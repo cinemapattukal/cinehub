@@ -2,49 +2,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CineHub</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: #101010;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
-    header {
-      padding: 22px 5%;
-      background: #181818;
-      border-bottom: 1px solid #333;
-    }
-    header h1 { margin: 0; color: #1ed760; }
-    main { padding: 25px 5%; }
-    input {
-      width: 100%;
-      padding: 14px;
-      border: 1px solid #444;
-      border-radius: 8px;
-      background: #222;
-      color: white;
-      font-size: 16px;
-    }
-    .welcome {
-      margin-top: 35px;
-      padding: 25px;
-      background: #202020;
-      border-radius: 12px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CineHub</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101010;color:white;font-family:Arial,sans-serif}
+header{padding:20px 5%;background:#181818;border-bottom:1px solid #333}
+header h1{margin:0;color:#1ed760}
+main{padding:20px 5%}
+input{width:100%;padding:14px;border:1px solid #444;border-radius:25px;background:#252525;color:white;font-size:16px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{min-width:0;cursor:pointer}
+.card img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:9px;background:#222}
+.card h3{font-size:14px;margin:8px 0 4px}
+.year{color:#aaa;font-size:13px}
+#status{color:#bbb;margin:20px 0}
+@media(min-width:700px){.grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}}
+</style>
 </head>
 <body>
-  <header><h1>CineHub</h1></header>
-  <main>
-    <input type="search" placeholder="Search movies...">
-    <section class="welcome">
-      <h2>Welcome to CineHub</h2>
-      <p>Your movie website starts here.</p>
-    </section>
-  </main>
+<header><h1>CineHub</h1></header>
+<main>
+<input id="search" type="search" placeholder="Search added movies...">
+<h2>Movies</h2>
+<p id="status">Loading movies...</p>
+<div class="grid" id="movies"></div>
+</main>
+
+<script type="module">
+import {initializeApp}
+from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {getFirestore,collection,getDocs}
+from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const firebaseConfig={
+ apiKey:"AIzaSyB96qkeFLXWMIMvld9jS9SOmbx2g2sJ98",
+ authDomain:"cinehub-27129.firebaseapp.com",
+ projectId:"cinehub-27129",
+ storageBucket:"cinehub-27129.firebasestorage.app",
+ messagingSenderId:"564236433071",
+ appId:"1:564236433071:web:474301819e114c22bac65a"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+const grid=document.getElementById("movies");
+const status=document.getElementById("status");
+const search=document.getElementById("search");
+let allMovies=[];
+
+function renderMovies(){
+ const q=search.value.trim().toLowerCase();
+ const filtered=allMovies.filter(m=>
+  (m.title||"").toLowerCase().includes(q)
+ );
+ grid.replaceChildren();
+
+ if(!filtered.length){
+  status.textContent=q
+   ?"No matching movies found."
+   :"No movies added yet. Add movies through Admin.";
+  return;
+ }
+
+ status.textContent="";
+ filtered.forEach(m=>{
+  const card=document.createElement("article");
+  card.className="card";
+
+  if(m.poster){
+   const img=document.createElement("img");
+   img.src=m.poster;
+   img.alt=m.title||"Movie poster";
+   img.loading="lazy";
+   card.append(img);
+  }
+
+  const title=document.createElement("h3");
+  title.textContent=m.title||"Untitled";
+  const year=document.createElement("div");
+  year.className="year";
+  year.textContent=m.year||"";
+  card.append(title,year);
+
+  grid.append(card);
+ });
+}
+
+async function loadMovies(){
+ try{
+  const snapshot=await getDocs(collection(db,"movies"));
+  allMovies=snapshot.docs.map(d=>({
+   ...d.data(),documentId:d.id
+  }));
+  allMovies.sort((a,b)=>
+   (b.updatedAt||"").localeCompare(a.updatedAt||"")
+  );
+  renderMovies();
+ }catch(error){
+  console.error(error);
+  status.textContent=
+   "Could not load movies. Check Firestore rules and Firebase configuration.";
+ }
+}
+
+search.addEventListener("input",renderMovies);
+loadMovies();
+</script>
 </body>
 </html>
