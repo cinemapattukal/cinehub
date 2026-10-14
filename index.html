@@ -8,14 +8,12 @@
 
 <style>
 *{box-sizing:border-box}
-
 body{
   margin:0;
   background:#101010;
   color:#fff;
   font-family:Arial,sans-serif;
 }
-
 header{
   position:sticky;
   top:0;
@@ -24,19 +22,16 @@ header{
   background:#181818;
   border-bottom:1px solid #303030;
 }
-
 header h1{
   margin:0;
   color:#1ed760;
   font-size:28px;
 }
-
 main{
   padding:20px 5%;
   max-width:1600px;
   margin:auto;
 }
-
 #search{
   width:100%;
   padding:14px 18px;
@@ -48,25 +43,20 @@ main{
   font-size:16px;
   outline:none;
 }
-
 #search:focus{border-color:#1ed760}
-
 h2{
   margin:8px 0 20px;
   font-size:23px;
 }
-
 .grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
   gap:14px;
 }
-
 .card{
   min-width:0;
   cursor:pointer;
 }
-
 .poster{
   display:block;
   width:100%;
@@ -75,26 +65,22 @@ h2{
   border-radius:9px;
   background:#222;
 }
-
 .card h3{
   margin:9px 0 5px;
   font-size:14px;
   line-height:1.4;
   overflow-wrap:anywhere;
 }
-
 .year{
   margin-bottom:6px;
   color:#aaa;
   font-size:13px;
 }
-
 #status{
   color:#bbb;
   font-size:14px;
   margin:18px 0;
 }
-
 #retry{
   display:none;
   margin:12px 0;
@@ -104,8 +90,8 @@ h2{
   background:#1ed760;
   color:#111;
   font-weight:bold;
+  cursor:pointer;
 }
-
 footer{
   padding:25px;
   margin-top:35px;
@@ -114,7 +100,6 @@ footer{
   text-align:center;
   font-size:13px;
 }
-
 @media(min-width:700px){
   .grid{
     grid-template-columns:repeat(5,minmax(0,1fr));
@@ -141,7 +126,7 @@ footer{
 
   <h2>Movies</h2>
   <p id="status" role="status" aria-live="polite"></p>
-  <button id="retry" type="button">Try Again</button>
+  <button id="retry" type="button">Reconnect</button>
   <div id="movies" class="grid"></div>
 </main>
 
@@ -154,7 +139,7 @@ from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
   getFirestore,
   collection,
-  getDocs
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 /* Firebase configuration */
@@ -176,31 +161,28 @@ const search = document.getElementById("search");
 const retry = document.getElementById("retry");
 
 const CACHE_KEY = "cinehub_movies_cache_v1";
+
 let allMovies = [];
 let loaded = false;
-let requestNumber = 0;
+let unsubscribeMovies = null;
 
-/* Read previously saved movie data from browser cache */
 function readCache(){
   try{
     const raw = localStorage.getItem(CACHE_KEY);
     if(!raw) return null;
 
     const data = JSON.parse(raw);
-    if(!Array.isArray(data)) return null;
-
-    return data;
+    return Array.isArray(data) ? data : null;
   }catch(error){
     return null;
   }
 }
 
-/* Save only the public movie data */
 function saveCache(movies){
   try{
     localStorage.setItem(CACHE_KEY,JSON.stringify(movies));
   }catch(error){
-    console.warn("Movie cache could not be saved",error);
+    console.warn("Cache unavailable:",error);
   }
 }
 
@@ -212,7 +194,6 @@ function renderMovies(){
   );
 
   grid.replaceChildren();
-  retry.style.display = "none";
 
   if(!filtered.length){
     status.textContent = query
@@ -227,20 +208,23 @@ function renderMovies(){
     const card = document.createElement("article");
     card.className = "card";
 
-    const img = document.createElement("img");
-    img.className = "poster";
-    img.alt = (movie.title || "Movie") + " poster";
-    img.loading = "lazy";
-
     if(movie.poster){
+      const img = document.createElement("img");
+      img.className = "poster";
       img.src = movie.poster;
-    }else{
-      img.hidden = true;
-    }
+      img.alt = (movie.title || "Movie") + " poster";
+      img.loading = "lazy";
 
-    img.onerror = () => {
-      img.style.visibility = "hidden";
-    };
+      img.onerror = () => {
+        img.style.visibility = "hidden";
+      };
+
+      card.appendChild(img);
+    }else{
+      const placeholder = document.createElement("div");
+      placeholder.className = "poster";
+      card.appendChild(placeholder);
+    }
 
     const title = document.createElement("h3");
     title.textContent = movie.title || "Untitled";
@@ -249,12 +233,12 @@ function renderMovies(){
     year.className = "year";
     year.textContent = movie.year || "";
 
-    card.append(img,title,year);
+    card.append(title,year);
     grid.appendChild(card);
   });
 }
 
-/* Show cached movies immediately, if available */
+/* Display cached movies immediately */
 const cachedMovies = readCache();
 
 if(cachedMovies !== null){
@@ -263,51 +247,51 @@ if(cachedMovies !== null){
   renderMovies();
 }
 
-/* Then get the latest saved movies from Firestore */
-async function loadMovies(){
-  const thisRequest = ++requestNumber;
-
+/* Subscribe to live Firestore changes */
+function loadMovies(){
   retry.style.display = "none";
 
-  /* Do not replace existing cached cards with a loading screen */
-  if(!loaded){
-    status.textContent = "";
+  if(unsubscribeMovies){
+    unsubscribeMovies();
+    unsubscribeMovies = null;
   }
 
-  try{
-    const snapshot = await getDocs(collection(db,"movies"));
+  unsubscribeMovies = onSnapshot(
+    collection(db,"movies"),
 
-    if(thisRequest !== requestNumber) return;
+    { includeMetadataChanges: false },
 
-    const freshMovies = snapshot.docs.map(document => ({
-      ...document.data(),
-      documentId: document.id
-    }));
+    snapshot => {
+      allMovies = snapshot.docs.map(document => ({
+        ...document.data(),
+        documentId: document.id
+      }));
 
-    freshMovies.sort((a,b) =>
-      (b.updatedAt || "").localeCompare(a.updatedAt || "")
-    );
+      allMovies.sort((a,b) =>
+        (b.updatedAt || "").localeCompare(a.updatedAt || "")
+      );
 
-    allMovies = freshMovies;
-    loaded = true;
+      loaded = true;
+      saveCache(allMovies);
+      renderMovies();
+      retry.style.display = "none";
+    },
 
-    saveCache(allMovies);
-    renderMovies();
+    error => {
+      console.error("Firestore listener error:",error);
 
-  }catch(error){
-    console.error("Firestore error:",error);
+      if(!loaded){
+        grid.replaceChildren();
+        status.textContent =
+          "Could not load movies. Check Firestore rules and connection.";
+      }else{
+        status.textContent =
+          "Connection interrupted. Showing available movies.";
+      }
 
-    /* Keep cached movies visible if Firestore is unavailable */
-    if(loaded){
-      status.textContent = "Showing saved movies. Refresh to try updating.";
-    }else{
-      grid.replaceChildren();
-      status.textContent =
-        "Could not load movies. Check internet, Firebase configuration and Firestore rules.";
+      retry.style.display = "inline-block";
     }
-
-    retry.style.display = "inline-block";
-  }
+  );
 }
 
 search.addEventListener("input",()=>{
