@@ -7,165 +7,126 @@
 <title>CineHub - Movies</title>
 
 <style>
-* {
-  box-sizing: border-box;
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#101010;
+  color:#fff;
+  font-family:Arial,sans-serif;
 }
 
-body {
-  margin: 0;
-  background: #101010;
-  color: #fff;
-  font-family: Arial, sans-serif;
+header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  padding:18px 5%;
+  background:#181818;
+  border-bottom:1px solid #303030;
 }
 
-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  padding: 18px 5%;
-  background: #181818;
-  border-bottom: 1px solid #303030;
+header h1{
+  margin:0;
+  color:#1ed760;
+  font-size:28px;
 }
 
-header h1 {
-  margin: 0;
-  color: #1ed760;
-  font-size: 28px;
+main{
+  padding:20px 5%;
+  max-width:1600px;
+  margin:auto;
 }
 
-main {
-  padding: 20px 5%;
-  max-width: 1600px;
-  margin: auto;
+#search{
+  width:100%;
+  padding:14px 18px;
+  margin-bottom:22px;
+  border:1px solid #444;
+  border-radius:25px;
+  background:#252525;
+  color:#fff;
+  font-size:16px;
+  outline:none;
 }
 
-#search {
-  width: 100%;
-  padding: 14px 18px;
-  margin-bottom: 22px;
-  border: 1px solid #444;
-  border-radius: 25px;
-  background: #252525;
-  color: white;
-  font-size: 16px;
-  outline: none;
+#search:focus{border-color:#1ed760}
+
+h2{
+  margin:8px 0 20px;
+  font-size:23px;
 }
 
-#search:focus {
-  border-color: #1ed760;
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
 }
 
-h2 {
-  margin: 8px 0 20px;
-  font-size: 23px;
+.card{
+  min-width:0;
+  cursor:pointer;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+.poster{
+  display:block;
+  width:100%;
+  aspect-ratio:2/3;
+  object-fit:cover;
+  border-radius:9px;
+  background:#222;
 }
 
-.card {
-  min-width: 0;
-  cursor: pointer;
+.card h3{
+  margin:9px 0 5px;
+  font-size:14px;
+  line-height:1.4;
+  overflow-wrap:anywhere;
 }
 
-.poster {
-  width: 100%;
-  aspect-ratio: 2 / 3;
-  display: block;
-  object-fit: cover;
-  border-radius: 9px;
-  background: #222;
+.year{
+  margin-bottom:6px;
+  color:#aaa;
+  font-size:13px;
 }
 
-.card h3 {
-  margin: 9px 0 5px;
-  font-size: 14px;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
+#status{
+  color:#bbb;
+  font-size:14px;
+  margin:18px 0;
 }
 
-.year {
-  margin-bottom: 6px;
-  color: #aaa;
-  font-size: 13px;
+#retry{
+  display:none;
+  margin:12px 0;
+  padding:12px 20px;
+  border:0;
+  border-radius:7px;
+  background:#1ed760;
+  color:#111;
+  font-weight:bold;
 }
 
-/* Poster skeleton while loading */
-.skeleton {
-  width: 100%;
-  aspect-ratio: 2 / 3;
-  border-radius: 9px;
-  background: linear-gradient(
-    90deg,
-    #202020 25%,
-    #303030 50%,
-    #202020 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+footer{
+  padding:25px;
+  margin-top:35px;
+  border-top:1px solid #303030;
+  color:#888;
+  text-align:center;
+  font-size:13px;
 }
 
-@keyframes shimmer {
-  to {
-    background-position: -200% 0;
+@media(min-width:700px){
+  .grid{
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:20px;
   }
-}
-
-#status {
-  color: #bbb;
-  font-size: 14px;
-  margin: 18px 0;
-}
-
-#retry {
-  display: none;
-  margin: 12px 0;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 7px;
-  background: #1ed760;
-  color: #111;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-footer {
-  padding: 25px;
-  margin-top: 35px;
-  border-top: 1px solid #303030;
-  color: #888;
-  text-align: center;
-  font-size: 13px;
-}
-
-@media (min-width: 700px) {
-  .grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 20px;
-  }
-
-  header h1 {
-    font-size: 32px;
-  }
-
-  .card h3 {
-    font-size: 15px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skeleton {
-    animation: none;
-  }
+  header h1{font-size:32px}
+  .card h3{font-size:15px}
 }
 </style>
 </head>
 
 <body>
-
 <header>
   <h1>CineHub</h1>
 </header>
@@ -179,23 +140,16 @@ footer {
   >
 
   <h2>Movies</h2>
-
-  <p id="status" role="status" aria-live="polite">
-    Loading movies...
-  </p>
-
+  <p id="status" role="status" aria-live="polite"></p>
   <button id="retry" type="button">Try Again</button>
-
   <div id="movies" class="grid"></div>
 </main>
 
-<footer>
-  CineHub
-</footer>
+<footer>CineHub</footer>
 
 <script type="module">
-import { initializeApp }
-  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {initializeApp}
+from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 
 import {
   getFirestore,
@@ -221,24 +175,36 @@ const status = document.getElementById("status");
 const search = document.getElementById("search");
 const retry = document.getElementById("retry");
 
+const CACHE_KEY = "cinehub_movies_cache_v1";
 let allMovies = [];
 let loaded = false;
+let requestNumber = 0;
 
-function showSkeletons() {
-  grid.replaceChildren();
+/* Read previously saved movie data from browser cache */
+function readCache(){
+  try{
+    const raw = localStorage.getItem(CACHE_KEY);
+    if(!raw) return null;
 
-  for (let i = 0; i < 10; i++) {
-    const skeleton = document.createElement("div");
-    skeleton.className = "skeleton";
-    skeleton.setAttribute("aria-hidden", "true");
-    grid.appendChild(skeleton);
+    const data = JSON.parse(raw);
+    if(!Array.isArray(data)) return null;
+
+    return data;
+  }catch(error){
+    return null;
   }
-
-  status.textContent = "Loading movies...";
-  retry.style.display = "none";
 }
 
-function renderMovies() {
+/* Save only the public movie data */
+function saveCache(movies){
+  try{
+    localStorage.setItem(CACHE_KEY,JSON.stringify(movies));
+  }catch(error){
+    console.warn("Movie cache could not be saved",error);
+  }
+}
+
+function renderMovies(){
   const query = search.value.trim().toLowerCase();
 
   const filtered = allMovies.filter(movie =>
@@ -248,11 +214,10 @@ function renderMovies() {
   grid.replaceChildren();
   retry.style.display = "none";
 
-  if (filtered.length === 0) {
+  if(!filtered.length){
     status.textContent = query
       ? "No matching movies found."
       : "No movies added yet. Add movies through Admin.";
-
     return;
   }
 
@@ -262,23 +227,20 @@ function renderMovies() {
     const card = document.createElement("article");
     card.className = "card";
 
-    if (movie.poster) {
-      const img = document.createElement("img");
-      img.className = "poster";
+    const img = document.createElement("img");
+    img.className = "poster";
+    img.alt = (movie.title || "Movie") + " poster";
+    img.loading = "lazy";
+
+    if(movie.poster){
       img.src = movie.poster;
-      img.alt = (movie.title || "Movie") + " poster";
-      img.loading = "lazy";
-
-      img.onerror = () => {
-        img.style.visibility = "hidden";
-      };
-
-      card.appendChild(img);
-    } else {
-      const placeholder = document.createElement("div");
-      placeholder.className = "poster";
-      card.appendChild(placeholder);
+    }else{
+      img.hidden = true;
     }
+
+    img.onerror = () => {
+      img.style.visibility = "hidden";
+    };
 
     const title = document.createElement("h3");
     title.textContent = movie.title || "Untitled";
@@ -287,52 +249,76 @@ function renderMovies() {
     year.className = "year";
     year.textContent = movie.year || "";
 
-    card.append(title, year);
-
+    card.append(img,title,year);
     grid.appendChild(card);
   });
 }
 
-async function loadMovies() {
-  showSkeletons();
+/* Show cached movies immediately, if available */
+const cachedMovies = readCache();
 
-  try {
-    const snapshot = await getDocs(collection(db, "movies"));
+if(cachedMovies !== null){
+  allMovies = cachedMovies;
+  loaded = true;
+  renderMovies();
+}
 
-    allMovies = snapshot.docs.map(document => ({
+/* Then get the latest saved movies from Firestore */
+async function loadMovies(){
+  const thisRequest = ++requestNumber;
+
+  retry.style.display = "none";
+
+  /* Do not replace existing cached cards with a loading screen */
+  if(!loaded){
+    status.textContent = "";
+  }
+
+  try{
+    const snapshot = await getDocs(collection(db,"movies"));
+
+    if(thisRequest !== requestNumber) return;
+
+    const freshMovies = snapshot.docs.map(document => ({
       ...document.data(),
       documentId: document.id
     }));
 
-    allMovies.sort((a, b) =>
+    freshMovies.sort((a,b) =>
       (b.updatedAt || "").localeCompare(a.updatedAt || "")
     );
 
+    allMovies = freshMovies;
     loaded = true;
+
+    saveCache(allMovies);
     renderMovies();
 
-  } catch (error) {
-    console.error("Firestore error:", error);
+  }catch(error){
+    console.error("Firestore error:",error);
 
-    grid.replaceChildren();
-    status.textContent =
-      "Could not load movies. Check your internet connection and Firestore rules.";
+    /* Keep cached movies visible if Firestore is unavailable */
+    if(loaded){
+      status.textContent = "Showing saved movies. Refresh to try updating.";
+    }else{
+      grid.replaceChildren();
+      status.textContent =
+        "Could not load movies. Check internet, Firebase configuration and Firestore rules.";
+    }
 
     retry.style.display = "inline-block";
-    loaded = false;
   }
 }
 
-search.addEventListener("input", () => {
-  if (loaded) {
+search.addEventListener("input",()=>{
+  if(loaded){
     renderMovies();
   }
 });
 
-retry.addEventListener("click", loadMovies);
+retry.addEventListener("click",loadMovies);
 
 loadMovies();
 </script>
-
 </body>
 </html>
