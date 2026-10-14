@@ -4,111 +4,335 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CineHub</title>
+<title>CineHub - Movies</title>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#101010;color:white;font-family:Arial,sans-serif}
-header{padding:20px 5%;background:#181818;border-bottom:1px solid #333}
-header h1{margin:0;color:#1ed760}
-main{padding:20px 5%}
-input{width:100%;padding:14px;border:1px solid #444;border-radius:25px;background:#252525;color:white;font-size:16px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.card{min-width:0;cursor:pointer}
-.card img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:9px;background:#222}
-.card h3{font-size:14px;margin:8px 0 4px}
-.year{color:#aaa;font-size:13px}
-#status{color:#bbb;margin:20px 0}
-@media(min-width:700px){.grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}}
-</style>
-</head>
-<body>
-<header><h1>CineHub</h1></header>
-<main>
-<input id="search" type="search" placeholder="Search added movies...">
-<h2>Movies</h2>
-<p id="status">Loading movies...</p>
-<div class="grid" id="movies"></div>
-</main>
+* {
+  box-sizing: border-box;
+}
 
-<script type="module">
-import {initializeApp}
-from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import {getFirestore,collection,getDocs}
-from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+body {
+  margin: 0;
+  background: #101010;
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
 
-const firebaseConfig={
- apiKey:"AIzaSyB96qkeFLXWMIMvld9jS9SOmbx2g2sJ98",
- authDomain:"cinehub-27129.firebaseapp.com",
- projectId:"cinehub-27129",
- storageBucket:"cinehub-27129.firebasestorage.app",
- messagingSenderId:"564236433071",
- appId:"1:564236433071:web:474301819e114c22bac65a"
-};
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 18px 5%;
+  background: #181818;
+  border-bottom: 1px solid #303030;
+}
 
-const app=initializeApp(firebaseConfig);
-const db=getFirestore(app);
-const grid=document.getElementById("movies");
-const status=document.getElementById("status");
-const search=document.getElementById("search");
-let allMovies=[];
+header h1 {
+  margin: 0;
+  color: #1ed760;
+  font-size: 28px;
+}
 
-function renderMovies(){
- const q=search.value.trim().toLowerCase();
- const filtered=allMovies.filter(m=>
-  (m.title||"").toLowerCase().includes(q)
- );
- grid.replaceChildren();
+main {
+  padding: 20px 5%;
+  max-width: 1600px;
+  margin: auto;
+}
 
- if(!filtered.length){
-  status.textContent=q
-   ?"No matching movies found."
-   :"No movies added yet. Add movies through Admin.";
-  return;
- }
+#search {
+  width: 100%;
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  border: 1px solid #444;
+  border-radius: 25px;
+  background: #252525;
+  color: white;
+  font-size: 16px;
+  outline: none;
+}
 
- status.textContent="";
- filtered.forEach(m=>{
-  const card=document.createElement("article");
-  card.className="card";
+#search:focus {
+  border-color: #1ed760;
+}
 
-  if(m.poster){
-   const img=document.createElement("img");
-   img.src=m.poster;
-   img.alt=m.title||"Movie poster";
-   img.loading="lazy";
-   card.append(img);
+h2 {
+  margin: 8px 0 20px;
+  font-size: 23px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.card {
+  min-width: 0;
+  cursor: pointer;
+}
+
+.poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  display: block;
+  object-fit: cover;
+  border-radius: 9px;
+  background: #222;
+}
+
+.card h3 {
+  margin: 9px 0 5px;
+  font-size: 14px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.year {
+  margin-bottom: 6px;
+  color: #aaa;
+  font-size: 13px;
+}
+
+/* Poster skeleton while loading */
+.skeleton {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 9px;
+  background: linear-gradient(
+    90deg,
+    #202020 25%,
+    #303030 50%,
+    #202020 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+#status {
+  color: #bbb;
+  font-size: 14px;
+  margin: 18px 0;
+}
+
+#retry {
+  display: none;
+  margin: 12px 0;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 7px;
+  background: #1ed760;
+  color: #111;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+footer {
+  padding: 25px;
+  margin-top: 35px;
+  border-top: 1px solid #303030;
+  color: #888;
+  text-align: center;
+  font-size: 13px;
+}
+
+@media (min-width: 700px) {
+  .grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 20px;
   }
 
-  const title=document.createElement("h3");
-  title.textContent=m.title||"Untitled";
-  const year=document.createElement("div");
-  year.className="year";
-  year.textContent=m.year||"";
-  card.append(title,year);
+  header h1 {
+    font-size: 32px;
+  }
 
-  grid.append(card);
- });
+  .card h3 {
+    font-size: 15px;
+  }
 }
 
-async function loadMovies(){
- try{
-  const snapshot=await getDocs(collection(db,"movies"));
-  allMovies=snapshot.docs.map(d=>({
-   ...d.data(),documentId:d.id
-  }));
-  allMovies.sort((a,b)=>
-   (b.updatedAt||"").localeCompare(a.updatedAt||"")
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>CineHub</h1>
+</header>
+
+<main>
+  <input
+    id="search"
+    type="search"
+    placeholder="Search added movies..."
+    aria-label="Search movies"
+  >
+
+  <h2>Movies</h2>
+
+  <p id="status" role="status" aria-live="polite">
+    Loading movies...
+  </p>
+
+  <button id="retry" type="button">Try Again</button>
+
+  <div id="movies" class="grid"></div>
+</main>
+
+<footer>
+  CineHub
+</footer>
+
+<script type="module">
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+/* Firebase configuration */
+const firebaseConfig = {
+  apiKey: "AIzaSyB96qkeFLXWMIMvld9jS9SOmbx2g2sJ98",
+  authDomain: "cinehub-27129.firebaseapp.com",
+  projectId: "cinehub-27129",
+  storageBucket: "cinehub-27129.firebasestorage.app",
+  messagingSenderId: "564236433071",
+  appId: "1:564236433071:web:474301819e114c22bac65a"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const grid = document.getElementById("movies");
+const status = document.getElementById("status");
+const search = document.getElementById("search");
+const retry = document.getElementById("retry");
+
+let allMovies = [];
+let loaded = false;
+
+function showSkeletons() {
+  grid.replaceChildren();
+
+  for (let i = 0; i < 10; i++) {
+    const skeleton = document.createElement("div");
+    skeleton.className = "skeleton";
+    skeleton.setAttribute("aria-hidden", "true");
+    grid.appendChild(skeleton);
+  }
+
+  status.textContent = "Loading movies...";
+  retry.style.display = "none";
+}
+
+function renderMovies() {
+  const query = search.value.trim().toLowerCase();
+
+  const filtered = allMovies.filter(movie =>
+    (movie.title || "").toLowerCase().includes(query)
   );
-  renderMovies();
- }catch(error){
-  console.error(error);
-  status.textContent=
-   "Could not load movies. Check Firestore rules and Firebase configuration.";
- }
+
+  grid.replaceChildren();
+  retry.style.display = "none";
+
+  if (filtered.length === 0) {
+    status.textContent = query
+      ? "No matching movies found."
+      : "No movies added yet. Add movies through Admin.";
+
+    return;
+  }
+
+  status.textContent = "";
+
+  filtered.forEach(movie => {
+    const card = document.createElement("article");
+    card.className = "card";
+
+    if (movie.poster) {
+      const img = document.createElement("img");
+      img.className = "poster";
+      img.src = movie.poster;
+      img.alt = (movie.title || "Movie") + " poster";
+      img.loading = "lazy";
+
+      img.onerror = () => {
+        img.style.visibility = "hidden";
+      };
+
+      card.appendChild(img);
+    } else {
+      const placeholder = document.createElement("div");
+      placeholder.className = "poster";
+      card.appendChild(placeholder);
+    }
+
+    const title = document.createElement("h3");
+    title.textContent = movie.title || "Untitled";
+
+    const year = document.createElement("div");
+    year.className = "year";
+    year.textContent = movie.year || "";
+
+    card.append(title, year);
+
+    grid.appendChild(card);
+  });
 }
 
-search.addEventListener("input",renderMovies);
+async function loadMovies() {
+  showSkeletons();
+
+  try {
+    const snapshot = await getDocs(collection(db, "movies"));
+
+    allMovies = snapshot.docs.map(document => ({
+      ...document.data(),
+      documentId: document.id
+    }));
+
+    allMovies.sort((a, b) =>
+      (b.updatedAt || "").localeCompare(a.updatedAt || "")
+    );
+
+    loaded = true;
+    renderMovies();
+
+  } catch (error) {
+    console.error("Firestore error:", error);
+
+    grid.replaceChildren();
+    status.textContent =
+      "Could not load movies. Check your internet connection and Firestore rules.";
+
+    retry.style.display = "inline-block";
+    loaded = false;
+  }
+}
+
+search.addEventListener("input", () => {
+  if (loaded) {
+    renderMovies();
+  }
+});
+
+retry.addEventListener("click", loadMovies);
+
 loadMovies();
 </script>
+
 </body>
 </html>
