@@ -1,0 +1,222 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CineHub Admin</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101010;color:#fff;font-family:Arial,sans-serif}
+header{background:#181818;padding:20px;color:#1ed760}
+main{max-width:700px;margin:auto;padding:20px}
+.panel{background:#202020;padding:20px;border-radius:12px;margin:18px 0}
+input,button{width:100%;padding:13px;margin:7px 0;border-radius:7px;font-size:16px}
+input{background:#111;color:white;border:1px solid #444}
+button{background:#1ed760;color:#111;border:0;font-weight:bold;cursor:pointer}
+button.secondary{background:#333;color:white}
+img{width:110px;border-radius:8px}
+.movie{display:flex;gap:15px;padding:12px 0;border-bottom:1px solid #444}
+small,#message{color:#bbb}
+</style>
+</head>
+<body>
+<header><h2>CineHub Admin</h2></header>
+<main>
+<section class="panel" id="loginPanel">
+<h2>Admin Login</h2>
+<input id="email" type="email" placeholder="Admin email">
+<input id="password" type="password" placeholder="Password">
+<button id="loginBtn">Login</button>
+<p id="loginMessage"></p>
+</section>
+
+<section class="panel" id="adminPanel" hidden>
+<h2>Add Movie</h2>
+<button class="secondary" id="logoutBtn">Logout</button>
+<input id="tmdbKey" type="password" placeholder="TMDB API Key">
+<input id="tmdbId" type="number" placeholder="TMDB Movie ID">
+<button id="fetchBtn">Fetch Movie Details</button>
+<div id="preview"></div>
+<p id="message"></p>
+<button id="saveBtn" hidden>Save Movie</button>
+
+<h2>Saved Movies</h2>
+<div id="movieList"></div>
+</section>
+</main>
+
+<script type="module">
+import {initializeApp}
+from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+ getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import {
+ getFirestore,collection,doc,getDocs,getDoc,setDoc,deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const firebaseConfig = {
+ apiKey: "AIzaSyB96qkeFLXWMIMvld9jS9SOmbx2g2sJ98",
+ authDomain: "cinehub-27129.firebaseapp.com",
+ projectId: "cinehub-27129",
+ storageBucket: "cinehub-27129.firebasestorage.app",
+ messagingSenderId: "564236433071",
+ appId: "1:564236433071:web:474301819e114c22bac65a"
+};
+
+const ADMIN_UID = "aqAm25zNdpaIDVc3BVCAN6gVfkb2";
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const $ = id => document.getElementById(id);
+let currentMovie = null;
+
+function message(text){$("message").textContent=text;}
+
+function showAdmin(user){
+ const allowed = user && user.uid === ADMIN_UID;
+ $("loginPanel").hidden = !!allowed;
+ $("adminPanel").hidden = !allowed;
+ if(user && !allowed) $("loginMessage").textContent =
+   "This account is not authorized as admin.";
+ if(allowed) loadMovies();
+}
+
+onAuthStateChanged(auth,user=>{
+ showAdmin(user);
+});
+
+$("loginBtn").onclick = async()=>{
+ $("loginMessage").textContent="Signing in...";
+ try{
+  await signInWithEmailAndPassword(
+   auth,$("email").value.trim(),$("password").value
+  );
+  if(auth.currentUser?.uid !== ADMIN_UID){
+   await signOut(auth);
+   $("loginMessage").textContent="Admin access denied.";
+  }
+ }catch(e){
+  $("loginMessage").textContent="Login failed: "+e.message;
+ }
+};
+
+$("logoutBtn").onclick=()=>signOut(auth);
+
+$("fetchBtn").onclick=async()=>{
+ const key=$("tmdbKey").value.trim();
+ const id=$("tmdbId").value.trim();
+ if(!key || !id){message("2851b0a195ccff91a13b27dab86418c4");return;}
+ currentMovie=null;
+ $("saveBtn").hidden=true;
+ message("Loading movie...");
+ try{
+  const url=`https://api.themoviedb.org/3/movie/${encodeURIComponent(id)}?api_key=${encodeURIComponent(key)}&language=en-US`;
+  const r=await fetch(url);
+  if(!r.ok) throw new Error("TMDB error: "+r.status);
+  const m=await r.json();
+
+  const creditsResponse=await fetch(
+   `https://api.themoviedb.org/3/movie/${m.id}/credits?api_key=${encodeURIComponent(key)}`
+  );
+  const credits=creditsResponse.ok?await creditsResponse.json():{crew:[],cast:[]};
+  const director=(credits.crew||[]).find(p=>p.job==="Director")?.name||"";
+  const cast=(credits.cast||[]).slice(0,10).map(p=>p.name);
+  const poster=m.poster_path
+   ? "https://image.tmdb.org/t/p/w500"+m.poster_path : "";
+
+  currentMovie={
+   tmdbId:String(m.id),
+   title:m.title||"",
+   overview:m.overview||"",
+   poster,
+   releaseDate:m.release_date||"",
+   year:(m.release_date||"").slice(0,4),
+   director,
+   cast,
+   rating:m.vote_average||0,
+   updatedAt:new Date().toISOString()
+  };
+
+  $("preview").innerHTML="";
+  const title=document.createElement("h3");
+  title.textContent=currentMovie.title;
+  const image=document.createElement("img");
+  image.src=poster;
+  image.alt=currentMovie.title;
+  const details=document.createElement("p");
+  details.textContent="Year: "+(currentMovie.year||"N/A")+" | Director: "+(director||"N/A");
+  const overview=document.createElement("p");
+  overview.textContent=currentMovie.overview;
+  $("preview").append(image,title,details,overview);
+  message("Movie loaded. Check details, then save.");
+  $("saveBtn").hidden=false;
+ }catch(e){
+  message("Could not fetch movie. Check the API key and TMDB ID.");
+  console.error(e);
+ }
+};
+
+$("saveBtn").onclick=async()=>{
+ const user=auth.currentUser;
+ if(!user || user.uid!==ADMIN_UID){
+  message("Admin login required.");return;
+ }
+ if(!currentMovie)return;
+ try{
+  const ref=doc(db,"movies",currentMovie.tmdbId);
+  await setDoc(ref,currentMovie,{merge:true});
+  message("Movie saved successfully!");
+  await loadMovies();
+ }catch(e){
+  message("Save failed: "+e.message);
+ }
+};
+
+async function loadMovies(){
+ if(auth.currentUser?.uid!==ADMIN_UID)return;
+ $("movieList").textContent="Loading...";
+ try{
+  const snap=await getDocs(collection(db,"movies"));
+  $("movieList").replaceChildren();
+  if(snap.empty){
+   $("movieList").textContent="No movies added yet.";
+   return;
+  }
+  snap.forEach(d=>{
+   const m=d.data();
+   const row=document.createElement("div");
+   row.className="movie";
+   if(m.poster){
+    const img=document.createElement("img");
+    img.src=m.poster;
+    img.alt=m.title||"Poster";
+    row.append(img);
+   }
+   const info=document.createElement("div");
+   const title=document.createElement("strong");
+   title.textContent=m.title||"Untitled";
+   const year=document.createElement("p");
+   year.textContent=m.year||"";
+   const del=document.createElement("button");
+   del.textContent="Delete";
+   del.onclick=async()=>{
+    if(!confirm("Delete "+(m.title||"this movie")+"?"))return;
+    try{
+     await deleteDoc(doc(db,"movies",d.id));
+     await loadMovies();
+    }catch(e){message("Delete failed: "+e.message);}
+   };
+   info.append(title,year,del);
+   row.append(info);
+   $("movieList").append(row);
+  });
+ }catch(e){
+  $("movieList").textContent="Could not load movies: "+e.message;
+ }
+}
+</script>
+</body>
+</html>
