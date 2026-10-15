@@ -8,105 +8,25 @@
 
 <style>
 *{box-sizing:border-box}
-body{
-  margin:0;
-  background:#101010;
-  color:#fff;
-  font-family:Arial,sans-serif;
-}
-header{
-  position:sticky;
-  top:0;
-  z-index:10;
-  padding:18px 5%;
-  background:#181818;
-  border-bottom:1px solid #303030;
-}
-header h1{
-  margin:0;
-  color:#1ed760;
-  font-size:28px;
-}
-main{
-  padding:20px 5%;
-  max-width:1600px;
-  margin:auto;
-}
-#search{
-  width:100%;
-  padding:14px 18px;
-  margin-bottom:22px;
-  border:1px solid #444;
-  border-radius:25px;
-  background:#252525;
-  color:#fff;
-  font-size:16px;
-  outline:none;
-}
+body{margin:0;background:#101010;color:#fff;font-family:Arial,sans-serif}
+header{position:sticky;top:0;z-index:10;padding:18px 5%;background:#181818;border-bottom:1px solid #303030}
+header h1{margin:0;color:#1ed760;font-size:28px}
+main{padding:20px 5%;max-width:1600px;margin:auto}
+#search{width:100%;padding:14px 18px;margin-bottom:22px;border:1px solid #444;border-radius:25px;background:#252525;color:#fff;font-size:16px;outline:none}
 #search:focus{border-color:#1ed760}
-h2{
-  margin:8px 0 20px;
-  font-size:23px;
-}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:14px;
-}
-.card{
-  min-width:0;
-  cursor:pointer;
-}
-.poster{
-  display:block;
-  width:100%;
-  aspect-ratio:2/3;
-  object-fit:cover;
-  border-radius:9px;
-  background:#222;
-}
-.card h3{
-  margin:9px 0 5px;
-  font-size:14px;
-  line-height:1.4;
-  overflow-wrap:anywhere;
-}
-.year{
-  margin-bottom:6px;
-  color:#aaa;
-  font-size:13px;
-}
-#status{
-  color:#bbb;
-  font-size:14px;
-  margin:18px 0;
-}
-#retry{
-  display:none;
-  margin:12px 0;
-  padding:12px 20px;
-  border:0;
-  border-radius:7px;
-  background:#1ed760;
-  color:#111;
-  font-weight:bold;
-  cursor:pointer;
-}
-footer{
-  padding:25px;
-  margin-top:35px;
-  border-top:1px solid #303030;
-  color:#888;
-  text-align:center;
-  font-size:13px;
-}
+h2{margin:8px 0 20px;font-size:23px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{min-width:0;cursor:pointer}
+.poster{display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:9px;background:#222}
+.card h3{margin:9px 0 5px;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.year{margin-bottom:6px;color:#aaa;font-size:13px}
+#status{color:#bbb;font-size:14px;margin:18px 0}
+#retry{display:none;margin:12px 0;padding:12px 20px;border:0;border-radius:7px;background:#1ed760;color:#111;font-weight:bold;cursor:pointer}
+footer{padding:25px;margin-top:35px;border-top:1px solid #303030;color:#888;text-align:center;font-size:13px}
 @media(min-width:700px){
-  .grid{
-    grid-template-columns:repeat(5,minmax(0,1fr));
-    gap:20px;
-  }
-  header h1{font-size:32px}
-  .card h3{font-size:15px}
+ .grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
+ header h1{font-size:32px}
+ .card h3{font-size:15px}
 }
 </style>
 </head>
@@ -117,12 +37,8 @@ footer{
 </header>
 
 <main>
-  <input
-    id="search"
-    type="search"
-    placeholder="Search added movies..."
-    aria-label="Search movies"
-  >
+  <input id="search" type="search"
+    placeholder="Search added movies..." aria-label="Search movies">
 
   <h2>Movies</h2>
   <p id="status" role="status" aria-live="polite"></p>
@@ -203,10 +119,14 @@ function renderMovies(){
   }
 
   status.textContent = "";
+  retry.style.display = "none";
 
   filtered.forEach(movie => {
     const card = document.createElement("article");
     card.className = "card";
+    card.tabIndex = 0;
+    card.setAttribute("role","link");
+    card.setAttribute("aria-label","View "+(movie.title||"movie")+" details");
 
     if(movie.poster){
       const img = document.createElement("img");
@@ -235,15 +155,24 @@ function renderMovies(){
 
     card.append(title,year);
 
-card.addEventListener("click",()=>{
-  window.location.href =
-    "movie.html?id=" + encodeURIComponent(movie.documentId);
-});
+    function openDetails(){
+      window.location.href =
+        "movie.html?id=" + encodeURIComponent(movie.documentId);
+    }
 
-grid.appendChild(card);
+    card.addEventListener("click",openDetails);
+    card.addEventListener("keydown",event=>{
+      if(event.key==="Enter" || event.key===" "){
+        event.preventDefault();
+        openDetails();
+      }
+    });
+
+    grid.appendChild(card);
+  });
 }
 
-/* Display cached movies immediately */
+/* Show cached movies immediately */
 const cachedMovies = readCache();
 
 if(cachedMovies !== null){
@@ -252,7 +181,7 @@ if(cachedMovies !== null){
   renderMovies();
 }
 
-/* Subscribe to live Firestore changes */
+/* Live updates when Admin adds or deletes movies */
 function loadMovies(){
   retry.style.display = "none";
 
@@ -263,8 +192,6 @@ function loadMovies(){
 
   unsubscribeMovies = onSnapshot(
     collection(db,"movies"),
-
-    { includeMetadataChanges: false },
 
     snapshot => {
       allMovies = snapshot.docs.map(document => ({
@@ -279,7 +206,6 @@ function loadMovies(){
       loaded = true;
       saveCache(allMovies);
       renderMovies();
-      retry.style.display = "none";
     },
 
     error => {
@@ -300,9 +226,7 @@ function loadMovies(){
 }
 
 search.addEventListener("input",()=>{
-  if(loaded){
-    renderMovies();
-  }
+  if(loaded) renderMovies();
 });
 
 retry.addEventListener("click",loadMovies);
