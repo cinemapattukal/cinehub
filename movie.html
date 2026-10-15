@@ -70,7 +70,21 @@ $("videoModal").addEventListener("click",e=>{if(e.target===$("videoModal"))close
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("videoModal").hidden)closeVideo()});
 function renderSongs(list){
   const box=$("songs");box.replaceChildren();
-  list.sort((a,b)=>String(a.songName||"").localeCompare(String(b.songName||"")));
+  const createdTime = value => {
+    if (!value) return 0;
+    if (typeof value.toMillis === "function") return value.toMillis();
+    if (typeof value === "number") return value;
+    const parsed = Date.parse(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+  // Existing songs without a timestamp stay first; newly added songs follow in creation order.
+  list.sort((a,b) => {
+    const ta = createdTime(a.createdAt), tb = createdTime(b.createdAt);
+    if (ta && tb) return ta - tb;
+    if (ta) return 1;
+    if (tb) return -1;
+    return 0;
+  });
   list.forEach((s,index)=>{
     const row=document.createElement("article");row.className="song-row";
     const number=document.createElement("div");number.className="song-number";number.textContent=String(index+1);
