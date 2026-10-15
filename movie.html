@@ -16,12 +16,12 @@
 .video-frame{display:block;width:100%;aspect-ratio:16/9;border:0;border-radius:8px;background:#000}
 @media(max-width:599px){
  .song-list{gap:12px}
- .song-row{grid-template-columns:42px auto minmax(0,1fr);gap:10px;padding:14px 12px}
+ .song-row{grid-template-columns:42px minmax(0,1fr) auto;gap:10px;padding:14px 12px}
  .song-number{width:42px;height:42px;font-size:20px}
- .song-info{grid-column:3;grid-row:1;align-self:center} .song-number{grid-column:1;grid-row:1} .song-info h4{font-size:18px;margin-bottom:5px}
+ .song-info{grid-column:2;grid-row:1;align-self:center} .song-number{grid-column:1;grid-row:1;align-self:center} .song-info h4{font-size:18px;margin-bottom:5px}
  .song-info p{font-size:14px}
- .song-actions{grid-column:2;grid-row:1;align-self:center;justify-content:flex-start;gap:6px;margin-top:0}
- .song-link{width:36px;height:36px;min-height:36px;padding:0}.song-link svg{width:19px;height:19px}
+ .song-actions{grid-column:3;grid-row:1;align-self:center;justify-content:flex-end;gap:4px;margin-top:0}
+ .song-link{width:32px;height:36px;min-height:36px;padding:0}.song-link svg{width:18px;height:18px}
  .video-modal{padding:10px}
  .video-dialog{padding:9px}
 }
