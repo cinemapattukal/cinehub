@@ -58,9 +58,8 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-/* Firebase configuration */
 const firebaseConfig = {
-  apiKey: "AIzaSyB96qkeFLXWMIMvld9jS9SOmbx2g2sJ98",
+  apiKey: "AIzaSyB96qkkeFLXWMIMvld9jS9SOmbx2g2sJ98",
   authDomain: "cinehub-27129.firebaseapp.com",
   projectId: "cinehub-27129",
   storageBucket: "cinehub-27129.firebasestorage.app",
@@ -86,7 +85,6 @@ function readCache(){
   try{
     const raw = localStorage.getItem(CACHE_KEY);
     if(!raw) return null;
-
     const data = JSON.parse(raw);
     return Array.isArray(data) ? data : null;
   }catch(error){
@@ -134,11 +132,9 @@ function renderMovies(){
       img.src = movie.poster;
       img.alt = (movie.title || "Movie") + " poster";
       img.loading = "lazy";
-
       img.onerror = () => {
         img.style.visibility = "hidden";
       };
-
       card.appendChild(img);
     }else{
       const placeholder = document.createElement("div");
@@ -156,8 +152,18 @@ function renderMovies(){
     card.append(title,year);
 
     function openDetails(){
-      window.location.href =
-        "movie.html?id=" + encodeURIComponent(movie.documentId);
+      try{
+        localStorage.setItem(
+          "cinehub_detail_v1_" + movie.documentId,
+          JSON.stringify(movie)
+        );
+      }catch(error){
+        console.warn("Could not cache selected movie:",error);
+      }
+
+      const detailsUrl = new URL("movie.html", window.location.href);
+      detailsUrl.searchParams.set("id", movie.documentId);
+      window.location.href = detailsUrl.href;
     }
 
     card.addEventListener("click",openDetails);
@@ -172,7 +178,6 @@ function renderMovies(){
   });
 }
 
-/* Show cached movies immediately */
 const cachedMovies = readCache();
 
 if(cachedMovies !== null){
@@ -181,7 +186,6 @@ if(cachedMovies !== null){
   renderMovies();
 }
 
-/* Live updates when Admin adds or deletes movies */
 function loadMovies(){
   retry.style.display = "none";
 
@@ -192,7 +196,6 @@ function loadMovies(){
 
   unsubscribeMovies = onSnapshot(
     collection(db,"movies"),
-
     snapshot => {
       allMovies = snapshot.docs.map(document => ({
         ...document.data(),
@@ -207,7 +210,6 @@ function loadMovies(){
       saveCache(allMovies);
       renderMovies();
     },
-
     error => {
       console.error("Firestore listener error:",error);
 
