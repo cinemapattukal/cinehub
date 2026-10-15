@@ -1,222 +1,32 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CineHub Admin</title>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101014"><title>CineHub — Admin Panel</title><link rel="stylesheet" href="admin.css">
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#101010;color:#fff;font-family:Arial,sans-serif}
-header{background:#181818;padding:20px;color:#1ed760}
-main{max-width:700px;margin:auto;padding:20px}
-.panel{background:#202020;padding:20px;border-radius:12px;margin:18px 0}
-input,button{width:100%;padding:13px;margin:7px 0;border-radius:7px;font-size:16px}
-input{background:#111;color:white;border:1px solid #444}
-button{background:#1ed760;color:#111;border:0;font-weight:bold;cursor:pointer}
-button.secondary{background:#333;color:white}
-img{width:110px;border-radius:8px}
-.movie{display:flex;gap:15px;padding:12px 0;border-bottom:1px solid #444}
-small,#message{color:#bbb}
-</style>
-</head>
-<body>
-<header><h2>CineHub Admin</h2></header>
-<main>
-<section class="panel" id="loginPanel">
-<h2>Admin Login</h2>
-<input id="email" type="email" placeholder="Admin email">
-<input id="password" type="password" placeholder="Password">
-<button id="loginBtn">Login</button>
-<p id="loginMessage"></p>
+[hidden]{display:none!important}.tabs{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.tabs button{flex:1;min-width:120px}.tabs button.active{background:#1ed760;color:#101010}.tab-pane{display:none}.tab-pane.active{display:block}.song-row{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #333}.song-row img{width:72px;height:90px;object-fit:cover;border-radius:8px;background:#292929}.song-row h3{margin:0 0 6px}.song-row p{margin:4px 0}.song-actions{display:flex;gap:8px;flex-wrap:wrap}.song-actions button{padding:9px 12px}@media(max-width:520px){.song-row{grid-template-columns:62px 1fr}.song-row img{width:62px;height:80px}.song-actions{grid-column:1/-1}.tabs button{min-width:90px}}
+</style></head><body>
+<header class="topbar"><a class="logo" href="./index.html">Cine<span>Hub</span></a><span class="admin-label">ADMIN PANEL</span><button id="logoutBtn" class="secondary" hidden>Log out</button></header>
+<main class="page">
+<section id="loginPanel" class="panel login"><p class="eyebrow">SECURE ACCESS</p><h1>Admin Login</h1><p class="muted">Sign in using your Firebase administrator account.</p><form id="loginForm"><label>Email<input id="emailInput" type="email" autocomplete="username" required></label><label>Password<input id="passwordInput" type="password" autocomplete="current-password" required></label><button class="primary" type="submit">Sign in</button><p id="loginMessage" class="message"></p></form></section>
+<section id="adminPanel" hidden>
+<div class="welcome"><div><p class="eyebrow">CINEHUB CONTENT</p><h1>Movie Manager</h1><p class="muted">Manage movies and songs.</p></div><span id="adminEmail" class="muted"></span></div>
+<section class="panel"><h2>TMDB API Key</h2><p class="muted">Save your API key once in this browser. After that, Fetch Movie needs only the Movie ID.</p><label>TMDB API v3 Key<input id="tmdbKeyInput" type="password" autocomplete="off" placeholder="Enter TMDB API v3 key"></label><div class="actions"><button id="saveKeyBtn" class="primary" type="button">Save API Key</button><button id="showKeyBtn" class="secondary" type="button">Show / Hide</button><span id="keyMessage" class="message"></span></div></section>
+<div class="tabs"><button type="button" class="primary active" data-tab="moviesTab">Movies</button><button type="button" class="secondary" data-tab="songsTab">Add Song</button></div>
+<section id="moviesTab" class="tab-pane active">
+<section class="panel"><h2>Fetch Movie Details</h2><p class="muted">Enter only the TMDB Movie ID.</p><form id="fetchForm" class="fetch"><label>TMDB Movie ID<input id="tmdbIdInput" inputmode="numeric" pattern="[0-9]+" required placeholder="550"></label><button id="fetchBtn" class="primary" type="submit">Fetch Movie Details</button></form><p id="fetchMessage" class="message"></p></section>
+<section class="panel"><div class="sectionHead"><h2 id="formTitle">Movie Details</h2><button id="clearFormBtn" class="secondary" type="button">Clear form</button></div><form id="movieForm"><input id="docIdInput" type="hidden"><div class="fields">
+<label>TMDB ID<input id="tmdbId" type="number" min="1" required></label><label>Movie title<input id="title" required maxlength="250"></label><label>Original title<input id="originalTitle" maxlength="250"></label><label>Release date<input id="releaseDate" type="date"></label><label>Rating<input id="rating" type="number" min="0" max="10" step="0.1"></label><label>Runtime (minutes)<input id="runtime" type="number" min="0"></label><label>Genres (comma-separated)<input id="genres" placeholder="Action, Drama"></label><label>Original language<input id="language" maxlength="10"></label><label class="wide">Poster path or URL<input id="posterPath" placeholder="/poster.jpg or https://..."></label><label class="wide">Backdrop path or URL<input id="backdropPath" placeholder="/backdrop.jpg or https://..."></label><label>Director<input id="director" maxlength="250" placeholder="Director name"></label><label class="wide">Trailer URL<input id="trailerUrl" type="url" placeholder="https://www.youtube.com/watch?v=..."></label><label class="wide">Download ZIP URL<input id="downloadZip" type="url" placeholder="https://..."></label><label class="wide">Tagline<input id="tagline" maxlength="500"></label><label class="wide">Overview<textarea id="overview" rows="5"></textarea></label></div><div class="previews"><div><span class="muted">Poster preview</span><img id="posterPreview" alt="Poster preview" hidden></div><div><span class="muted">Backdrop preview</span><img id="backdropPreview" alt="Backdrop preview" hidden></div></div><div class="actions"><button id="saveBtn" class="primary" type="submit">Save Movie</button><button id="deleteCurrentBtn" class="danger" type="button" hidden>Delete This Movie</button><span id="saveMessage" class="message"></span></div></form></section>
+<section class="panel"><div class="sectionHead"><div><h2>Saved Movies</h2><p class="muted">Firestore collection: <code>movies</code></p></div><button id="refreshBtn" class="secondary" type="button">Refresh list</button></div><label class="search">Filter saved movies<input id="movieSearch" type="search" placeholder="Search title or TMDB ID"></label><div id="moviesList"><p class="muted">Sign in to load movies.</p></div></section>
 </section>
-
-<section class="panel" id="adminPanel" hidden>
-<h2>Add Movie</h2>
-<button class="secondary" id="logoutBtn">Logout</button>
-<input id="tmdbKey" type="password" placeholder="TMDB API Key">
-<input id="tmdbId" type="number" placeholder="TMDB Movie ID">
-<button id="fetchBtn">Fetch Movie Details</button>
-<div id="preview"></div>
-<p id="message"></p>
-<button id="saveBtn" hidden>Save Movie</button>
-
-<h2>Saved Movies</h2>
-<div id="movieList"></div>
+<section id="songsTab" class="tab-pane">
+<section class="panel"><h2 id="songFormTitle">Add Song</h2><p class="muted">Songs are saved against the selected movie and appear on that movie's details page.</p><form id="songForm"><input id="songDocId" type="hidden"><div class="fields">
+<label class="wide">Movie Name<select id="songMovieId" required><option value="">Loading movies…</option></select></label>
+<label class="wide">Song Image URL<input id="songImageUrl" type="url" placeholder="https://..." required></label>
+<label class="wide">Song Name<input id="songName" maxlength="250" required></label>
+<label>Singer Name<input id="songSinger" maxlength="250" required></label>
+<label>Music Director Name<input id="songMusicDirector" maxlength="250" required></label>
+<label class="wide">YouTube Video URL<input id="songYoutubeUrl" type="url" placeholder="https://www.youtube.com/watch?v=..."></label>
+<label class="wide">Audio Download Link<input id="songAudioUrl" type="url" placeholder="https://..." required></label>
+</div><div class="previews"><div><span class="muted">Song image preview</span><img id="songImagePreview" alt="Song image preview" hidden></div></div><div class="actions"><button id="saveSongBtn" class="primary" type="submit">Save Song</button><button id="clearSongBtn" class="secondary" type="button">Clear Song Form</button><span id="songMessage" class="message"></span></div></form></section>
+<section class="panel"><div class="sectionHead"><h2>Saved Songs</h2><button id="refreshSongsBtn" class="secondary" type="button">Refresh songs</button></div><label class="search">Filter songs<input id="songSearch" type="search" placeholder="Search song or movie"></label><div id="songsList"><p class="muted">No songs loaded.</p></div></section>
 </section>
-</main>
-
-<script type="module">
-import {initializeApp}
-from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import {
- getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import {
- getFirestore,collection,doc,getDocs,getDoc,setDoc,deleteDoc
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyB96kqkeFLXWMIMvld9jS9SOmbx2g2sJ98",
-  authDomain: "cinehub-27129.firebaseapp.com",
-  projectId: "cinehub-27129",
-  storageBucket: "cinehub-27129.firebasestorage.app",
-  messagingSenderId: "564236433071",
-  appId: "1:564236433071:web:474301819e114c22bac65a"
-};
-
-const ADMIN_UID = "aqAm25zNdpaIDVc3BVCAN6gVfkb2";
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-const $ = id => document.getElementById(id);
-let currentMovie = null;
-
-function message(text){$("message").textContent=text;}
-
-function showAdmin(user){
- const allowed = user && user.uid === ADMIN_UID;
- $("loginPanel").hidden = !!allowed;
- $("adminPanel").hidden = !allowed;
- if(user && !allowed) $("loginMessage").textContent =
-   "This account is not authorized as admin.";
- if(allowed) loadMovies();
-}
-
-onAuthStateChanged(auth,user=>{
- showAdmin(user);
-});
-
-$("loginBtn").onclick = async()=>{
- $("loginMessage").textContent="Signing in...";
- try{
-  await signInWithEmailAndPassword(
-   auth,$("email").value.trim(),$("password").value
-  );
-  if(auth.currentUser?.uid !== ADMIN_UID){
-   await signOut(auth);
-   $("loginMessage").textContent="Admin access denied.";
-  }
- }catch(e){
-  $("loginMessage").textContent="Login failed: "+e.message;
- }
-};
-
-$("logoutBtn").onclick=()=>signOut(auth);
-
-$("fetchBtn").onclick=async()=>{
- const key=$("tmdbKey").value.trim();
- const id=$("tmdbId").value.trim();
- if(!key || !id){message("2851b0a195ccff91a13b27dab86418c4");return;}
- currentMovie=null;
- $("saveBtn").hidden=true;
- message("Loading movie...");
- try{
-  const url=`https://api.themoviedb.org/3/movie/${encodeURIComponent(id)}?api_key=${encodeURIComponent(key)}&language=en-US`;
-  const r=await fetch(url);
-  if(!r.ok) throw new Error("TMDB error: "+r.status);
-  const m=await r.json();
-
-  const creditsResponse=await fetch(
-   `https://api.themoviedb.org/3/movie/${m.id}/credits?api_key=${encodeURIComponent(key)}`
-  );
-  const credits=creditsResponse.ok?await creditsResponse.json():{crew:[],cast:[]};
-  const director=(credits.crew||[]).find(p=>p.job==="Director")?.name||"";
-  const cast=(credits.cast||[]).slice(0,10).map(p=>p.name);
-  const poster=m.poster_path
-   ? "https://image.tmdb.org/t/p/w500"+m.poster_path : "";
-
-  currentMovie={
-   tmdbId:String(m.id),
-   title:m.title||"",
-   overview:m.overview||"",
-   poster,
-   releaseDate:m.release_date||"",
-   year:(m.release_date||"").slice(0,4),
-   director,
-   cast,
-   rating:m.vote_average||0,
-   updatedAt:new Date().toISOString()
-  };
-
-  $("preview").innerHTML="";
-  const title=document.createElement("h3");
-  title.textContent=currentMovie.title;
-  const image=document.createElement("img");
-  image.src=poster;
-  image.alt=currentMovie.title;
-  const details=document.createElement("p");
-  details.textContent="Year: "+(currentMovie.year||"N/A")+" | Director: "+(director||"N/A");
-  const overview=document.createElement("p");
-  overview.textContent=currentMovie.overview;
-  $("preview").append(image,title,details,overview);
-  message("Movie loaded. Check details, then save.");
-  $("saveBtn").hidden=false;
- }catch(e){
-  message("Could not fetch movie. Check the API key and TMDB ID.");
-  console.error(e);
- }
-};
-
-$("saveBtn").onclick=async()=>{
- const user=auth.currentUser;
- if(!user || user.uid!==ADMIN_UID){
-  message("Admin login required.");return;
- }
- if(!currentMovie)return;
- try{
-  const ref=doc(db,"movies",currentMovie.tmdbId);
-  await setDoc(ref,currentMovie,{merge:true});
-  message("Movie saved successfully!");
-  await loadMovies();
- }catch(e){
-  message("Save failed: "+e.message);
- }
-};
-
-async function loadMovies(){
- if(auth.currentUser?.uid!==ADMIN_UID)return;
- $("movieList").textContent="Loading...";
- try{
-  const snap=await getDocs(collection(db,"movies"));
-  $("movieList").replaceChildren();
-  if(snap.empty){
-   $("movieList").textContent="No movies added yet.";
-   return;
-  }
-  snap.forEach(d=>{
-   const m=d.data();
-   const row=document.createElement("div");
-   row.className="movie";
-   if(m.poster){
-    const img=document.createElement("img");
-    img.src=m.poster;
-    img.alt=m.title||"Poster";
-    row.append(img);
-   }
-   const info=document.createElement("div");
-   const title=document.createElement("strong");
-   title.textContent=m.title||"Untitled";
-   const year=document.createElement("p");
-   year.textContent=m.year||"";
-   const del=document.createElement("button");
-   del.textContent="Delete";
-   del.onclick=async()=>{
-    if(!confirm("Delete "+(m.title||"this movie")+"?"))return;
-    try{
-     await deleteDoc(doc(db,"movies",d.id));
-     await loadMovies();
-    }catch(e){message("Delete failed: "+e.message);}
-   };
-   info.append(title,year,del);
-   row.append(info);
-   $("movieList").append(row);
-  });
- }catch(e){
-  $("movieList").textContent="Could not load movies: "+e.message;
- }
-}
-</script>
-</body>
-</html>
+<p class="footnote">Movie information and images are provided by TMDB. CineHub is not endorsed or certified by TMDB.</p>
+</section></main><script type="module" src="admin.js"></script></body></html>
