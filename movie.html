@@ -7,7 +7,7 @@
 .song-info{min-width:0}
 .song-info h4{font-size:clamp(17px,2vw,23px);line-height:1.25;margin:0 0 6px;color:#20252b;overflow-wrap:anywhere}
 .song-info p{font-size:clamp(14px,1.7vw,18px);line-height:1.4;color:#6b7782;margin:0;overflow-wrap:anywhere}
-.song-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.song-actions{display:flex;align-items:center;justify-content:flex-start;gap:8px;flex-wrap:wrap}
 .song-link{display:inline-flex;align-items:center;justify-content:center;width:52px;height:46px;min-height:46px;padding:0;border:0;border-radius:8px;text-align:center;text-decoration:none;font-size:0;font-weight:700;background:#16a9df;color:#fff;white-space:nowrap;cursor:pointer;flex-shrink:0}.song-link svg{width:23px;height:23px;display:block;fill:currentColor}
 .song-youtube{background:#252a31;color:#fff}
 .video-modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.82)}
@@ -81,17 +81,17 @@ function renderSongs(list){
     credits.textContent=names.join(", ");
     info.append(title,credits);
     const actions=document.createElement("div");actions.className="song-actions";
-    const audio=safeUrl(s.audioDownloadUrl||"");
-    if(audio){
-      const a=document.createElement("a");a.className="song-link";a.href=audio;a.target="_blank";a.rel="noopener";a.setAttribute("aria-label","Download audio");a.title="Download audio";
-      a.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a1 1 0 0 1 1 1v9.17l2.59-2.58L17 12l-5 5-5-5 1.41-1.41L11 13.17V4a1 1 0 0 1 1-1ZM5 19h14v2H5z"/></svg>';
-      actions.append(a);
-    }
     const yt=safeUrl(s.youtubeUrl||"");
     if(yt&&youtubeId(yt)){
       const b=document.createElement("button");b.type="button";b.className="song-link song-youtube";b.setAttribute("aria-label","Play YouTube video");b.title="Play YouTube video";
       b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
       b.addEventListener("click",()=>openVideo(yt));actions.append(b);
+    }
+    const audio=safeUrl(s.audioDownloadUrl||"");
+    if(audio){
+      const a=document.createElement("a");a.className="song-link";a.href=audio;a.target="_blank";a.rel="noopener";a.setAttribute("aria-label","Download audio");a.title="Download audio";
+      a.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a1 1 0 0 1 1 1v9.17l2.59-2.58L17 12l-5 5-5-5 1.41-1.41L11 13.17V4a1 1 0 0 1 1-1ZM5 19h14v2H5z"/></svg>';
+      actions.append(a);
     }
     row.append(number,info,actions);box.append(row);
   });
