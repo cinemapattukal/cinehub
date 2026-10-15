@@ -1,7 +1,40 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CineHub - Movie Details</title>
-<style>*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:#100d0d;color:#fff;font-family:Arial,sans-serif}header{padding:18px 5%;background:#181818;border-bottom:1px solid #303030}header h1{margin:0;color:#1ed760}header a{color:inherit;text-decoration:none}main{max-width:850px;margin:auto;padding:28px 22px 45px;text-align:center}.back{display:block;text-align:left;margin-bottom:25px;color:#1ed760;text-decoration:none}.poster{display:block;width:min(100%,360px);aspect-ratio:2/3;object-fit:cover;border-radius:16px;margin:0 auto 28px;background:#222}.eyebrow{color:#aaa;letter-spacing:3px;font-size:13px;margin:10px 0}h2{font-size:clamp(27px,5vw,42px);line-height:1.12;margin:12px 0}.meta{color:#aaa;font-size:18px;line-height:1.6;margin:15px 0 28px}.director{color:#ddd;font-size:17px;margin:10px 0 30px}.button{display:block;width:100%;padding:19px 14px;margin:14px 0;border-radius:18px;font-size:19px;font-weight:bold;text-decoration:none;border:0}.download{background:#f5f5f5;color:#111}.disabled{background:#262626;color:#888}.section{margin-top:35px;text-align:left}.section h3{font-size:23px;margin-bottom:18px}.cast{display:flex;flex-wrap:nowrap;gap:14px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:4px 2px 14px}.person{flex:0 0 112px;min-width:0;scroll-snap-align:start}.person img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:10px;background:#292929}.person p{font-size:13px;line-height:1.4;overflow-wrap:anywhere;margin:7px 0}.cast::-webkit-scrollbar,.song-list::-webkit-scrollbar{height:4px}.cast::-webkit-scrollbar-thumb,.song-list::-webkit-scrollbar-thumb{background:#444;border-radius:10px}.song-list{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 14px}.song-card{flex:0 0 150px;min-width:0;background:#202020;border-radius:12px;overflow:hidden}.song-card img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;background:#292929}.song-info{padding:10px}.song-info h4{font-size:14px;margin:0 0 7px;line-height:1.35}.song-info p{font-size:12px;color:#bbb;margin:5px 0;overflow-wrap:anywhere}.song-link{display:block;text-align:center;text-decoration:none;font-size:12px;font-weight:bold;background:#1ed760;color:#111;padding:9px;border-radius:8px;margin-top:8px}.song-youtube{background:#303030;color:#fff}@media(max-width:599px){main{max-width:100%;padding:24px 20px 40px;text-align:center}.back{text-align:left}.poster{width:min(100%,220px);margin:0 auto 28px;border-radius:16px}.eyebrow{margin-top:12px}h2{font-size:36px;line-height:1.12}.meta{font-size:18px}.director{font-size:17px}.button{width:100%;padding:20px 14px;border-radius:18px}.section{text-align:left}.person{flex-basis:105px}.song-card{flex-basis:140px}}</style></head>
+<style>*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:#100d0d;color:#fff;font-family:Arial,sans-serif}header{padding:18px 5%;background:#181818;border-bottom:1px solid #303030}header h1{margin:0;color:#1ed760}header a{color:inherit;text-decoration:none}main{max-width:850px;margin:auto;padding:28px 22px 45px;text-align:center}.back{display:block;text-align:left;margin-bottom:25px;color:#1ed760;text-decoration:none}.poster{display:block;width:min(100%,360px);aspect-ratio:2/3;object-fit:cover;border-radius:16px;margin:0 auto 28px;background:#222}.eyebrow{color:#aaa;letter-spacing:3px;font-size:13px;margin:10px 0}h2{font-size:clamp(27px,5vw,42px);line-height:1.12;margin:12px 0}.meta{color:#aaa;font-size:18px;line-height:1.6;margin:15px 0 28px}.director{color:#ddd;font-size:17px;margin:10px 0 30px}.button{display:block;width:100%;padding:19px 14px;margin:14px 0;border-radius:18px;font-size:19px;font-weight:bold;text-decoration:none;border:0}.download{background:#f5f5f5;color:#111}.disabled{background:#262626;color:#888}.section{margin-top:35px;text-align:left}.section h3{font-size:23px;margin-bottom:18px}.cast{display:flex;flex-wrap:nowrap;gap:14px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:4px 2px 14px}.person{flex:0 0 112px;min-width:0;scroll-snap-align:start}.person img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:10px;background:#292929}.person p{font-size:13px;line-height:1.4;overflow-wrap:anywhere;margin:7px 0}.cast::-webkit-scrollbar,.song-list::-webkit-scrollbar{height:4px}.cast::-webkit-scrollbar-thumb,.song-list::-webkit-scrollbar-thumb{background:#444;border-radius:10px}
+.song-list{display:flex;flex-direction:column;gap:14px;padding:4px 0 14px;min-width:0}
+.song-row{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:18px;align-items:center;min-width:0;padding:18px 20px;background:#eff9ff;border:1px solid #e0f1fb;border-radius:12px;color:#20252b}
+.song-number{width:54px;height:54px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#16a9df;color:#fff;font-size:25px;font-weight:800;flex-shrink:0}
+.song-info{min-width:0}
+.song-info h4{font-size:clamp(17px,2vw,23px);line-height:1.25;margin:0 0 6px;color:#20252b;overflow-wrap:anywhere}
+.song-info p{font-size:clamp(14px,1.7vw,18px);line-height:1.4;color:#6b7782;margin:0;overflow-wrap:anywhere}
+.song-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.song-link{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:11px 20px;border:0;border-radius:8px;text-align:center;text-decoration:none;font-size:16px;font-weight:700;background:#16a9df;color:#fff;white-space:nowrap;cursor:pointer}
+.song-youtube{background:#252a31;color:#fff}
+.video-modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.82)}
+.video-dialog{position:relative;width:min(900px,100%);background:#171717;border:1px solid #444;border-radius:14px;padding:14px;box-shadow:0 18px 60px #0008}
+.video-close{display:block;margin:0 0 10px auto;border:0;border-radius:50%;width:42px;height:42px;background:#333;color:#fff;font-size:27px;line-height:1}
+.video-frame{display:block;width:100%;aspect-ratio:16/9;border:0;border-radius:8px;background:#000}
+@media(max-width:599px){
+ .song-list{gap:12px}
+ .song-row{grid-template-columns:42px minmax(0,1fr);gap:12px;padding:14px 12px}
+ .song-number{width:42px;height:42px;font-size:20px}
+ .song-info h4{font-size:18px;margin-bottom:5px}
+ .song-info p{font-size:14px}
+ .song-actions{grid-column:2;justify-content:flex-start;gap:8px;margin-top:2px}
+ .song-link{min-height:40px;padding:9px 12px;font-size:13px;white-space:normal}
+ .video-modal{padding:10px}
+ .video-dialog{padding:9px}
+}
+@media(max-width:599px){main{max-width:100%;padding:24px 20px 40px;text-align:center}.back{text-align:left}.poster{width:min(100%,220px);margin:0 auto 28px;border-radius:16px}.eyebrow{margin-top:12px}h2{font-size:36px;line-height:1.12}.meta{font-size:18px}.director{font-size:17px}.button{width:100%;padding:20px 14px;border-radius:18px}.section{text-align:left}.person{flex-basis:105px}.song-card{flex-basis:140px}}</style></head>
 <body><header><h1><a href="./">CineHub</a></h1></header><main><a class="back" href="./">← Back to Movies</a><p id="status" role="status" aria-live="polite">Loading movie details…</p><div id="content" hidden><img id="poster" class="poster" alt="Movie poster"><div class="eyebrow">MOVIE</div><h2 id="title"></h2><div id="year" class="meta"></div><div id="director" class="director"></div><a id="download" class="button download" hidden target="_blank" rel="noopener">↓ &nbsp; Download ZIP</a><div id="noDownload" class="button disabled">Download ZIP link not added</div><section class="section" id="castSection" hidden><h3>Cast</h3><div id="cast" class="cast"></div></section><section class="section" id="songsSection" hidden><h3>Songs</h3><div id="songs" class="song-list"></div></section></div></main>
+
+<div id="videoModal" class="video-modal" hidden role="dialog" aria-modal="true" aria-label="YouTube video player">
+  <div class="video-dialog">
+    <button id="videoClose" class="video-close" type="button" aria-label="Close video">×</button>
+    <iframe id="videoFrame" class="video-frame" title="YouTube video player"
+      allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+  </div>
+</div>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {getFirestore,doc,getDoc,collection,getDocs,query,where} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
@@ -12,7 +45,54 @@ function showMovie(m){setText("title",m.title||m.name||"Movie");setText("year",m
 function renderCast(people){const box=$("cast");box.replaceChildren();let count=0;(people||[]).forEach(p=>{const name=typeof p==="string"?p:p.name;if(!name)return;const item=document.createElement("div");item.className="person";const img=document.createElement("img");img.alt=name;img.loading="lazy";let path=typeof p==="object"?(p.profilePath||p.profile_path||p.imageUrl||p.image||""):"";if(path&&!path.startsWith("http"))path="https://image.tmdb.org/t/p/w342"+path;if(path){img.src=path;img.onerror=()=>img.hidden=true}else img.hidden=true;const label=document.createElement("p");label.textContent=name;item.append(img,label);box.append(item);count++});$("castSection").hidden=count===0}
 async function findPersonImage(name){try{const u=new URL("https://api.themoviedb.org/3/search/person");u.searchParams.set("api_key",TMDB_API_KEY);u.searchParams.set("query",name);const r=await fetch(u);if(!r.ok)return"";const d=await r.json();const p=(d.results||[]).find(x=>x.profile_path);return p?"https://image.tmdb.org/t/p/w342"+p.profile_path:""}catch{return""}}
 async function loadCast(m){let people=[];try{let id=m.tmdbId||m.tmdbID||m.tmdb_id||"";if(!id&&m.title){const u=new URL("https://api.themoviedb.org/3/search/movie");u.searchParams.set("api_key",TMDB_API_KEY);u.searchParams.set("query",m.title);const r=await fetch(u);if(r.ok){const d=await r.json();id=d.results?.[0]?.id||""}}if(id){const r=await fetch("https://api.themoviedb.org/3/movie/"+encodeURIComponent(id)+"/credits?api_key="+encodeURIComponent(TMDB_API_KEY));if(r.ok){const d=await r.json();people=(d.cast||[]).slice(0,20).map(p=>({name:p.name,profilePath:p.profile_path?"https://image.tmdb.org/t/p/w342"+p.profile_path:""}))}}}catch(e){console.warn("Cast loading:",e)}if(!people.length)people=(m.cast||[]);renderCast(people);const items=[...$("cast").querySelectorAll(".person")];await Promise.all(items.slice(0,10).map(async(item,i)=>{const img=item.querySelector("img");if(img&&!img.hidden)return;const p=people[i];const name=typeof p==="string"?p:p?.name;if(!name)return;const url=await findPersonImage(name);if(url){img.src=url;img.hidden=false}}))}
-function renderSongs(list){const box=$("songs");box.replaceChildren();list.sort((a,b)=>String(a.songName||"").localeCompare(String(b.songName||"")));list.forEach(s=>{const card=document.createElement("article");card.className="song-card";const img=document.createElement("img");img.loading="lazy";img.alt=s.songName||"Song image";img.src=s.imageUrl||"";img.onerror=()=>{img.hidden=true};const info=document.createElement("div");info.className="song-info";const title=document.createElement("h4");title.textContent=s.songName||"Untitled song";const singer=document.createElement("p");singer.textContent="Singer: "+(s.singerName||"—");const music=document.createElement("p");music.textContent="Music: "+(s.musicDirectorName||"—");info.append(title,singer,music);const audio=safeUrl(s.audioDownloadUrl||"");if(audio){const a=document.createElement("a");a.className="song-link";a.href=audio;a.target="_blank";a.rel="noopener";a.textContent="Audio Download";info.append(a)}const yt=safeUrl(s.youtubeUrl||"");if(yt){const a=document.createElement("a");a.className="song-link song-youtube";a.href=yt;a.target="_blank";a.rel="noopener";a.textContent="YouTube Video";info.append(a)}card.append(img,info);box.append(card)});$("songsSection").hidden=list.length===0}
+function youtubeId(value){
+  const safe=safeUrl(value);if(!safe)return "";
+  try{
+    const u=new URL(safe);const host=u.hostname.toLowerCase();
+    if(host==="youtu.be"||host==="www.youtu.be")return u.pathname.split("/").filter(Boolean)[0]||"";
+    if(host.endsWith("youtube.com")||host==="youtube-nocookie.com"||host.endsWith(".youtube-nocookie.com")){
+      if(u.searchParams.get("v"))return u.searchParams.get("v");
+      const m=u.pathname.match(/^\/(?:embed|shorts|live)\/([^/?]+)/);return m?m[1]:"";
+    }
+  }catch{}
+  return "";
+}
+function openVideo(url){
+  const id=youtubeId(url);if(!id)return;
+  $("videoFrame").src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(id)+"?autoplay=1&rel=0";
+  $("videoModal").hidden=false;document.body.style.overflow="hidden";
+}
+function closeVideo(){
+  $("videoFrame").src="";$("videoModal").hidden=true;document.body.style.overflow="";
+}
+$("videoClose").addEventListener("click",closeVideo);
+$("videoModal").addEventListener("click",e=>{if(e.target===$("videoModal"))closeVideo()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("videoModal").hidden)closeVideo()});
+function renderSongs(list){
+  const box=$("songs");box.replaceChildren();
+  list.sort((a,b)=>String(a.songName||"").localeCompare(String(b.songName||"")));
+  list.forEach((s,index)=>{
+    const row=document.createElement("article");row.className="song-row";
+    const number=document.createElement("div");number.className="song-number";number.textContent=String(index+1);
+    const info=document.createElement("div");info.className="song-info";
+    const title=document.createElement("h4");title.textContent=s.songName||"Untitled song";
+    const credits=document.createElement("p");
+    const names=[s.musicDirectorName,s.singerName].map(v=>String(v||"").trim()).filter(Boolean);
+    credits.textContent=names.join(", ");
+    info.append(title,credits);
+    const actions=document.createElement("div");actions.className="song-actions";
+    const audio=safeUrl(s.audioDownloadUrl||"");
+    if(audio){
+      const a=document.createElement("a");a.className="song-link";a.href=audio;a.target="_blank";a.rel="noopener";a.textContent="Download";actions.append(a);
+    }
+    const yt=safeUrl(s.youtubeUrl||"");
+    if(yt&&youtubeId(yt)){
+      const b=document.createElement("button");b.type="button";b.className="song-link song-youtube";b.textContent="▶ YouTube Video";b.addEventListener("click",()=>openVideo(yt));actions.append(b);
+    }
+    row.append(number,info,actions);box.append(row);
+  });
+  $("songsSection").hidden=list.length===0;
+}
 async function loadSongs(){try{const snap=await getDocs(query(collection(db,"songs"),where("movieId","==",String(movieId))));renderSongs(snap.docs.map(d=>({docId:d.id,...d.data()})))}catch(e){console.error("Songs loading error:",e);$("songsSection").hidden=true}}
 async function loadMovie(){if(!movieId){$("status").textContent="Movie ID is missing.";return}let cachedMovie=null;try{const raw=localStorage.getItem(CACHE_PREFIX+movieId);if(raw){cachedMovie=JSON.parse(raw);showMovie(cachedMovie);renderCast(cachedMovie.cast||[]);loadSongs();loadCast(cachedMovie)}}catch(e){console.warn("Cache read error:",e)}try{const snap=await getDoc(doc(db,"movies",movieId));if(!snap.exists()){if(!cachedMovie)$("status").textContent="Movie not found.";return}const m={...snap.data(),documentId:snap.id};try{localStorage.setItem(CACHE_PREFIX+movieId,JSON.stringify(m))}catch{}showMovie(m);await Promise.all([loadCast(m),loadSongs()])}catch(e){console.error("Movie loading error:",e);if(!cachedMovie)$("status").textContent="Could not load movie. Check internet and Firestore rules."}}
 loadMovie();
