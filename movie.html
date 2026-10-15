@@ -93,7 +93,60 @@ function renderSongs(list){
   });
   $("songsSection").hidden=list.length===0;
 }
-async function loadSongs(){try{const snap=await getDocs(query(collection(db,"songs"),where("movieId","==",String(movieId))));renderSongs(snap.docs.map(d=>({docId:d.id,...d.data()})))}catch(e){console.error("Songs loading error:",e);$("songsSection").hidden=true}}
-async function loadMovie(){if(!movieId){$("status").textContent="Movie ID is missing.";return}let cachedMovie=null;try{const raw=localStorage.getItem(CACHE_PREFIX+movieId);if(raw){cachedMovie=JSON.parse(raw);showMovie(cachedMovie);renderCast(cachedMovie.cast||[]);loadSongs();loadCast(cachedMovie)}}catch(e){console.warn("Cache read error:",e)}try{const snap=await getDoc(doc(db,"movies",movieId));if(!snap.exists()){if(!cachedMovie)$("status").textContent="Movie not found.";return}const m={...snap.data(),documentId:snap.id};try{localStorage.setItem(CACHE_PREFIX+movieId,JSON.stringify(m))}catch{}showMovie(m);await Promise.all([loadCast(m),loadSongs()])}catch(e){console.error("Movie loading error:",e);if(!cachedMovie)$("status").textContent="Could not load movie. Check internet and Firestore rules."}}
+const SONG_CACHE_PREFIX="cinehub_songs_v1_";
+let songsRequest=null;
+async function loadSongs(){
+  if(!movieId)return;
+  const cacheKey=SONG_CACHE_PREFIX+movieId;
+  // Render previously loaded songs immediately so refresh does not show an empty section.
+  try{
+    const raw=localStorage.getItem(cacheKey);
+    if(raw){
+      const cached=JSON.parse(raw);
+      if(Array.isArray(cached))renderSongs(cached);
+    }
+  }catch(e){console.warn("Song cache read error:",e)}
+  // Avoid duplicate Firestore requests when both cached and live movie data load.
+  if(songsRequest)return songsRequest;
+  songsRequest=(async()=>{
+    try{
+      const snap=await getDocs(query(collection(db,"songs"),where("movieId","==",String(movieId))));
+      const fresh=snap.docs.map(d=>({docId:d.id,...d.data()}));
+      renderSongs(fresh);
+      try{localStorage.setItem(cacheKey,JSON.stringify(fresh))}catch(e){console.warn("Song cache save error:",e)}
+    }catch(e){
+      console.error("Songs loading error:",e);
+      // Keep cached songs visible if the network request fails.
+      try{if(!localStorage.getItem(cacheKey))$("songsSection").hidden=true}catch{}
+    }finally{songsRequest=null}
+  })();
+  return songsRequest;
+}
+async function loadMovie(){
+  if(!movieId){$("status").textContent="Movie ID is missing.";return}
+  let cachedMovie=null;
+  try{
+    const raw=localStorage.getItem(CACHE_PREFIX+movieId);
+    if(raw){
+      cachedMovie=JSON.parse(raw);
+      showMovie(cachedMovie);
+      renderCast(cachedMovie.cast||[]);
+      loadCast(cachedMovie);
+    }
+  }catch(e){console.warn("Cache read error:",e)}
+  try{
+    const snap=await getDoc(doc(db,"movies",movieId));
+    if(!snap.exists()){if(!cachedMovie)$("status").textContent="Movie not found.";return}
+    const m={...snap.data(),documentId:snap.id};
+    try{localStorage.setItem(CACHE_PREFIX+movieId,JSON.stringify(m))}catch{}
+    showMovie(m);
+    await loadCast(m);
+  }catch(e){
+    console.error("Movie loading error:",e);
+    if(!cachedMovie)$("status").textContent="Could not load movie. Check internet and Firestore rules.";
+  }
+}
+// Start the song request immediately, in parallel with movie details.
+loadSongs();
 loadMovie();
 </script></body></html>
