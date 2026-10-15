@@ -234,8 +234,13 @@ function renderMovies(){
     year.textContent = movie.year || "";
 
     card.append(title,year);
-    grid.appendChild(card);
-  });
+
+card.addEventListener("click",()=>{
+  window.location.href =
+    "movie.html?id=" + encodeURIComponent(movie.documentId);
+});
+
+grid.appendChild(card);
 }
 
 /* Display cached movies immediately */
