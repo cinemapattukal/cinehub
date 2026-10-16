@@ -41,4 +41,19 @@ $("songForm").addEventListener("submit",async e=>{e.preventDefault();if(!user)re
 $("clearSongBtn").addEventListener("click",clearSongForm);$("refreshSongsBtn").addEventListener("click",loadSongs);$("songSearch").addEventListener("input",renderSongs);$("songsList").addEventListener("click",e=>{const edit=e.target.closest("[data-song-edit]"),del=e.target.closest("[data-song-delete]");if(edit)editSong(edit.dataset.songEdit);if(del)deleteSong(del.dataset.songDelete)});
 document.querySelectorAll("[data-tab]").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b===btn));document.querySelectorAll(".tab-pane").forEach(p=>p.classList.toggle("active",p.id===btn.dataset.tab))}));
 $("tmdbKeyInput").value=localStorage.getItem(KEY_STORAGE)||DEFAULT_TMDB_KEY;
-onAuthStateChanged(auth,async u=>{user=u;if(u){$("loginPanel").hidden=true;$("adminPanel").hidden=false;$("logoutBtn").hidden=false;$("adminEmail").textContent=u.email||"";await Promise.all([loadMovies(),loadSongs()])}else{$("loginPanel").hidden=false;$("adminPanel").hidden=true;$("logoutBtn").hidden=true}});
+const ADMIN_UID="aqAm25zNdpaIDVc3BVCAN6gVfkb2";
+onAuthStateChanged(auth,async u=>{
+  if(u && u.uid!==ADMIN_UID){
+    $("loginMessage").textContent="This account does not have admin access.";
+    await signOut(auth);
+    return;
+  }
+  user=u;
+  if(u){
+    $("loginPanel").hidden=true;$("adminPanel").hidden=false;$("logoutBtn").hidden=false;
+    $("adminEmail").textContent=u.email||"";
+    await Promise.all([loadMovies(),loadSongs()]);
+  }else{
+    $("loginPanel").hidden=false;$("adminPanel").hidden=true;$("logoutBtn").hidden=true;
+  }
+});
