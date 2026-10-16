@@ -1,99 +1,11 @@
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import {
-  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  signOut, onAuthStateChanged, updateProfile
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyB96kqkeFLXWMIMvld9jS9SOmbx2g2sJ98",
-  authDomain: "cinehub-27129.firebaseapp.com",
-  projectId: "cinehub-27129",
-  storageBucket: "cinehub-27129.firebasestorage.app",
-  messagingSenderId: "564236433071",
-  appId: "1:564236433071:web:474301819e114c22bac65a"
-};
-const appName = "cinehub-public-auth";
-const app = getApps().some(item => item.name === appName) ? getApp(appName) : initializeApp(firebaseConfig, appName);
-const auth = getAuth(app);
-const $ = id => document.getElementById(id);
-
-let mode = "login";
-const modal = $("accountModal");
-const form = $("accountForm");
-const message = $("accountMessage");
-const submit = $("accountSubmitBtn");
-
-function showMessage(text, ok = false) {
-  message.textContent = text;
-  message.style.color = ok ? "#8be0ae" : "#ffb8c0";
-}
-function setMode(next) {
-  mode = next;
-  $("accountLoginTab").classList.toggle("selected", mode === "login");
-  $("accountRegisterTab").classList.toggle("selected", mode === "register");
-  $("accountNameWrap").hidden = mode !== "register";
-  $("accountName").required = mode === "register";
-  $("accountPassword").autocomplete = mode === "login" ? "current-password" : "new-password";
-  submit.textContent = mode === "login" ? "Login" : "Create Account";
-  $("accountTitle").textContent = mode === "login" ? "Welcome back" : "Create your account";
-  showMessage("");
-}
-function openModal(next = "login") {
-  setMode(next);
-  modal.hidden = false;
-  document.body.style.overflow = "hidden";
-  setTimeout(() => $(mode === "register" ? "accountName" : "accountEmail").focus(), 30);
-}
-function closeModal() {
-  modal.hidden = true;
-  document.body.style.overflow = "";
-}
-$("accountOpenBtn").addEventListener("click", () => openModal("login"));
-$("accountCloseBtn").addEventListener("click", closeModal);
-modal.addEventListener("click", event => { if (event.target.dataset.accountClose === "true") closeModal(); });
-document.addEventListener("keydown", event => { if (event.key === "Escape" && !modal.hidden) closeModal(); });
-$("accountLoginTab").addEventListener("click", () => setMode("login"));
-$("accountRegisterTab").addEventListener("click", () => setMode("register"));
-$("accountLogoutBtn").addEventListener("click", async () => {
-  try { await signOut(auth); showMessage("Logged out.", true); }
-  catch (error) { openModal("login"); showMessage(error.message); }
-});
-onAuthStateChanged(auth, user => {
-  $("accountOpenBtn").hidden = !!user;
-  $("accountLogoutBtn").hidden = !user;
-  $("accountUserLabel").hidden = !user;
-  $("accountUserLabel").textContent = user ? (user.displayName || user.email || "Signed in") : "";
-});
-form.addEventListener("submit", async event => {
-  event.preventDefault();
-  const email = $("accountEmail").value.trim();
-  const password = $("accountPassword").value;
-  submit.disabled = true;
-  submit.textContent = mode === "login" ? "Signing in…" : "Creating account…";
-  try {
-    if (mode === "register") {
-      const name = $("accountName").value.trim();
-      if (password.length < 6) throw new Error("Password must be at least 6 characters.");
-      const credential = await createUserWithEmailAndPassword(auth, email, password);
-      if (name) await updateProfile(credential.user, { displayName: name });
-      showMessage("Account created successfully. You are now logged in.", true);
-    } else {
-      await signInWithEmailAndPassword(auth, email, password);
-      showMessage("Login successful.", true);
-    }
-    form.reset();
-    setTimeout(closeModal, 700);
-  } catch (error) {
-    const errors = {
-      "auth/email-already-in-use": "This email is already registered. Please log in.",
-      "auth/invalid-email": "Enter a valid email address.",
-      "auth/weak-password": "Use a stronger password with at least 6 characters.",
-      "auth/invalid-credential": "Incorrect email or password.",
-      "auth/operation-not-allowed": "Email/Password sign-in is not enabled in Firebase Authentication."
-    };
-    showMessage(errors[error.code] || error.message || "Could not complete authentication.");
-  } finally {
-    submit.disabled = false;
-    submit.textContent = mode === "login" ? "Login" : "Create Account";
-  }
-});
+import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+const firebaseConfig={apiKey:"AIzaSyB96kqkeFLXWMIMvld9jS9SOmbx2g2sJ98",authDomain:"cinehub-27129.firebaseapp.com",projectId:"cinehub-27129",storageBucket:"cinehub-27129.firebasestorage.app",messagingSenderId:"564236433071",appId:"1:564236433071:web:474301819e114c22bac65a"};
+const app=getApps().length?getApp():initializeApp(firebaseConfig),auth=getAuth(app),$=id=>document.getElementById(id);
+const modal=$("accountModal"),form=$("accountForm"),nameWrap=$("accountNameWrap"),nameInput=$("accountName"),emailInput=$("accountEmail"),passwordInput=$("accountPassword"),submitBtn=$("accountSubmitBtn"),message=$("accountMessage"),loginTab=$("accountLoginTab"),registerTab=$("accountRegisterTab"),openBtn=$("accountOpenBtn"),closeBtn=$("accountCloseBtn"),logoutBtn=$("accountLogoutBtn"),userLabel=$("accountUserLabel");let mode="login";
+function showMessage(text,success=false){message.textContent=text;message.style.color=success?"#8df0b0":"#ffb8c0"}
+function setMode(next){mode=next;const reg=mode==="register";loginTab.classList.toggle("selected",!reg);registerTab.classList.toggle("selected",reg);nameWrap.hidden=!reg;nameInput.required=reg;passwordInput.autocomplete=reg?"new-password":"current-password";submitBtn.textContent=reg?"Create Account":"Login";$("accountTitle").textContent=reg?"Create your account":"Welcome to CineHub";showMessage("")}
+function openModal(next="login"){setMode(next);modal.hidden=false;document.body.style.overflow="hidden";setTimeout(()=>emailInput.focus(),0)}function closeModal(){modal.hidden=true;document.body.style.overflow="";form.reset();setMode("login")}
+openBtn?.addEventListener("click",()=>openModal("login"));closeBtn?.addEventListener("click",closeModal);loginTab?.addEventListener("click",()=>setMode("login"));registerTab?.addEventListener("click",()=>setMode("register"));modal?.addEventListener("click",e=>{if(e.target.dataset.accountClose==="true")closeModal()});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modal&&!modal.hidden)closeModal()});logoutBtn?.addEventListener("click",async()=>{try{await signOut(auth)}catch(e){console.error("Logout failed",e)}});
+form?.addEventListener("submit",async e=>{e.preventDefault();submitBtn.disabled=true;submitBtn.textContent=mode==="register"?"Creating account...":"Signing in...";showMessage("");try{const email=emailInput.value.trim(),password=passwordInput.value;if(mode==="register"){const cred=await createUserWithEmailAndPassword(auth,email,password);const displayName=nameInput.value.trim();if(displayName)await updateProfile(cred.user,{displayName});showMessage("Account created successfully.",true)}else{await signInWithEmailAndPassword(auth,email,password);showMessage("Login successful.",true)}setTimeout(closeModal,500)}catch(error){const messages={"auth/email-already-in-use":"This email is already registered. Please log in.","auth/invalid-email":"Enter a valid email address.","auth/weak-password":"Use a password with at least 6 characters.","auth/invalid-credential":"Email or password is incorrect.","auth/user-not-found":"No account found for this email.","auth/wrong-password":"Email or password is incorrect.","auth/too-many-requests":"Too many attempts. Please try again later.","auth/network-request-failed":"Network error. Check your internet connection."};showMessage(messages[error.code]||error.message||"Could not sign in. Please try again.")}finally{submitBtn.disabled=false;submitBtn.textContent=mode==="register"?"Create Account":"Login"}});
+onAuthStateChanged(auth,user=>{if(user){openBtn.hidden=true;userLabel.hidden=false;userLabel.textContent=user.displayName||user.email||"Signed in";userLabel.title=user.email||"";logoutBtn.hidden=false}else{openBtn.hidden=false;userLabel.hidden=true;userLabel.textContent="";logoutBtn.hidden=true}});
