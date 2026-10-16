@@ -2,220 +2,305 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#101014">
-  <meta name="description" content="Discover movies, popular films, ratings and trailers on CineHub.">
-  <title>CineHub — Discover Movies</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CineHub - Movies</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101010;color:#fff;font-family:Arial,sans-serif}
+header{position:sticky;top:0;z-index:10;padding:18px 5%;background:#181818;border-bottom:1px solid #303030}
+.site-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+header h1{margin:0;color:#1ed760;font-size:28px}
+.account-actions{display:flex;align-items:center;gap:8px;min-width:0}
+.account-btn{border:0;border-radius:999px;padding:9px 13px;background:#1ed760;color:#111;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer}
+.account-logout{background:#292929;color:#fff}
+.account-user{max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#bbb;font-size:12px}
+.account-modal[hidden]{display:none!important}
+.account-modal{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;font-family:Arial,sans-serif}
+.account-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.78)}
+.account-card{position:relative;width:min(420px,100%);max-height:calc(100dvh - 32px);overflow:auto;padding:24px;background:#181818;color:#fff;border:1px solid #383838;border-radius:16px;box-shadow:0 20px 80px #0009}
+.account-close{position:absolute;top:10px;right:10px;width:36px;height:36px;border:0;border-radius:50%;background:#303030;color:#fff;font-size:24px;cursor:pointer}
+.account-logo{display:inline-block;margin-bottom:14px;color:#1ed760;font-size:22px;font-weight:800;text-decoration:none}
+.account-card h2{margin:0 0 6px;font-size:23px}
+.account-subtitle{margin:0 0 18px;color:#aaa;font-size:14px}
+.account-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px;padding:4px;background:#101010;border-radius:9px}
+.account-tabs button{border:0;border-radius:7px;padding:10px;background:transparent;color:#bbb;font-weight:700;cursor:pointer}
+.account-tabs button.selected{background:#1ed760;color:#111}
+#accountForm{display:grid;gap:12px}
+#accountForm label{display:grid;gap:6px;color:#eee;font-size:13px;font-weight:600}
+#accountForm input{width:100%;min-height:44px;padding:10px 12px;border:1px solid #444;border-radius:8px;background:#101010;color:#fff;font-size:16px}
+.account-submit{min-height:44px;border:0;border-radius:8px;background:#1ed760;color:#111;font-weight:800;cursor:pointer}
+#accountMessage{min-height:18px;margin:0;color:#ffb8c0;font-size:13px;overflow-wrap:anywhere}
+.account-admin-link{margin-top:16px;padding-top:13px;border-top:1px solid #383838;color:#aaa;text-align:center;font-size:13px}
+.account-admin-link a{color:#1ed760;font-weight:700;text-decoration:none}
+@media(max-width:420px){.site-header{padding:14px 4%;}.account-btn{padding:8px 10px;font-size:12px}.account-user{max-width:85px}}
+main{padding:20px 5%;max-width:1600px;margin:auto}
+#search{width:100%;padding:14px 18px;margin-bottom:22px;border:1px solid #444;border-radius:25px;background:#252525;color:#fff;font-size:16px;outline:none}
+#search:focus{border-color:#1ed760}
+h2{margin:8px 0 20px;font-size:23px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{min-width:0;cursor:pointer}
+.poster{display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:9px;background:#222}
+.card h3{margin:9px 0 5px;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.year{margin-bottom:6px;color:#aaa;font-size:13px}
+#status{color:#bbb;font-size:14px;margin:18px 0}
+#retry{display:none;margin:12px 0;padding:12px 20px;border:0;border-radius:7px;background:#1ed760;color:#111;font-weight:bold;cursor:pointer}
+footer{padding:25px;margin-top:35px;border-top:1px solid #303030;color:#888;text-align:center;font-size:13px}
+@media(min-width:700px){
+ .grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
+ header h1{font-size:32px}
+ .card h3{font-size:15px}
+}
+</style>
 </head>
+
 <body>
-  <header class="topbar">
-    <a class="logo" href="./">Cine<span>Hub</span></a>
-
-    
-<nav>
-  <a class="active" href="#home" data-mode="trending">Home</a>
-  <a href="#trending" data-mode="trending">Trending</a>
-  <a href="#popular" data-mode="popular">Movies</a>
-  <a href="#toprated" data-mode="toprated">Top Rated</a>
-</nav>
-
-
-    <label class="search-box">
-      <span>⌕</span>
-      <input id="searchInput" type="search"
-        placeholder="Search movies..." aria-label="Search movies">
-    </label>
-    <div class="account-actions">
-      <button id="accountOpenBtn" class="account-btn" type="button">Login / Register</button>
-      <span id="accountUserLabel" class="account-user" hidden></span>
-      <button id="accountLogoutBtn" class="account-btn account-logout" type="button" hidden>Log out</button>
-    </div>
-  </header>
-
-  <main id="home">
-    <section class="hero" id="hero">
-      <div class="hero-content">
-        <span class="eyebrow">YOUR MOVIE DESTINATION</span>
-        <h1>Discover your<br>next <span>favorite.</span></h1>
-        <p>Explore movies, ratings, stories and trailers — all in one place.</p>
-        <button id="exploreBtn" class="primary-btn">Explore Movies ↗</button>
-      </div>
-      <div class="hero-art" id="heroArt" aria-hidden="true"></div>
-      <div class="hero-shade"></div>
-    </section>
-
-    <section class="toolbar">
-      <div>
-        <h2 id="resultsTitle">Trending Movies</h2>
-        <p class="muted" id="resultsSubtitle">Find something great to watch.</p>
-      </div>
-      <select id="genreSelect" aria-label="Filter by genre">
-        <option value="">All Genres</option>
-      </select>
-    </section>
-
-    <section id="trending" class="movie-grid" aria-live="polite">
-      <div class="loading">Loading movies...</div>
-    </section>
-
-    <div class="load-more-wrap">
-      <button id="loadMoreBtn" class="secondary-btn" hidden>
-        Load More Movies
-      </button>
-    </div>
-
-    <section class="info-strip" id="popular">
-      <div>
-        <span class="info-icon">✦</span>
-        <h3>Find your next watch</h3>
-        <p>Explore popular and highly rated films.</p>
-      </div>
-      <div>
-        <span class="info-icon">▶</span>
-        <h3>Watch trailers</h3>
-        <p>Preview a movie before choosing it.</p>
-      </div>
-      <div>
-        <span class="info-icon">★</span>
-        <h3>Explore ratings</h3>
-        <p>Discover movies loved by audiences.</p>
-      </div>
-    </section>
-  </main>
-
-  <div id="movieModal" class="modal" hidden>
-    <div class="modal-backdrop" data-close="true"></div>
-    <article class="modal-card details-card" role="dialog"
-      aria-modal="true" aria-labelledby="modalTitle">
-      <button id="closeModal" class="close-btn" aria-label="Close">✕</button>
-
-      <section class="details-heading">
-        <img id="detailPoster" class="detail-poster" alt="Movie poster">
-        <div class="details-heading-copy">
-          <div class="details-kicker"><span id="detailType">MOVIE</span><span id="detailStatus" class="status-pill">Details</span></div>
-          <h2 id="modalTitle">Movie title</h2>
-          <p id="detailTagline" class="detail-tagline"></p>
-          <p id="detailDateRuntime" class="muted"></p>
-        </div>
-      </section>
-
-      <div class="modal-body details-body">
-        <div class="details-actions">
-          <div class="score-wrap"><span id="detailScore" class="score-ring">—</span><span><strong id="detailPercent">—</strong><small>User Score</small></span></div>
-          <button id="watchNowBtn" class="primary-btn">▶ Watch Now</button>
-          <button id="downloadBtn" class="secondary-btn">↓ Download</button>
-          <button id="watchlistBtn" class="secondary-btn">＋ Watchlist</button>
-          <button id="favoriteBtn" class="icon-action" aria-label="Add to favorites">♡</button>
-        </div>
-
-        <div id="detailGenres" class="genre-chips"></div>
-        <section class="details-section">
-          <h3>Overview</h3>
-          <p id="modalOverview"></p>
-        </section>
-        <section class="details-section">
-          <h3>Movie Information</h3>
-          <div id="detailFacts" class="facts-grid"></div>
-        </section>
-        <section class="details-section">
-          <h3>Production</h3>
-          <div id="detailProduction" class="production-list"><span class="muted">Loading...</span></div>
-        </section>
-        <section id="collectionSection" class="details-section" hidden>
-          <h3 id="collectionTitle">Collection</h3>
-          <div id="collectionMovies" class="related-row"></div>
-        </section>
-        <section class="details-section">
-          <h3>Cast</h3>
-          <div id="detailCast" class="cast-row"><span class="muted">Loading cast...</span></div>
-        </section>
-        <section class="details-section">
-          <h3>More Like This</h3>
-          <div id="similarMovies" class="related-row"><span class="muted">Loading recommendations...</span></div>
-        </section>
-        <section class="details-section">
-          <h3>Trailer</h3>
-          <div class="modal-actions">
-            <button id="trailerBtn" class="primary-btn">▶ Watch Trailer</button>
-          </div>
-          <p id="modalMessage" class="muted"></p>
-          <div id="trailerContainer" class="trailer-container" hidden></div>
-        </section>
-      </div>
-    </article>
+<header class="site-header">
+  <h1>CineHub</h1>
+  <div class="account-actions">
+    <button id="accountOpenBtn" class="account-btn" type="button">Login / Register</button>
+    <span id="accountUserLabel" class="account-user" hidden></span>
+    <button id="accountLogoutBtn" class="account-btn account-logout" type="button" hidden>Log out</button>
   </div>
-  <footer>
-    <a class="logo" href="./">Cine<span>Hub</span></a>
-    <p>Discover movies. Find your next favorite.</p>
-    <small>Movie information provided by TMDB. This site is not endorsed or certified by TMDB.</small>
-  </footer>
+</header>
 
+<main>
+  <input id="search" type="search"
+    placeholder="Search added movies..." aria-label="Search movies">
 
-  <div id="accountModal" class="account-modal" hidden>
-    <div class="account-backdrop" data-account-close="true"></div>
-    <section class="account-card" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
-      <button id="accountCloseBtn" class="account-close" type="button" aria-label="Close">×</button>
-      <a class="logo account-logo" href="./">Cine<span>Hub</span></a>
-      <h2 id="accountTitle">Welcome to CineHub</h2>
-      <p class="account-subtitle">Sign in or create your free account.</p>
-      <div class="account-tabs">
-        <button id="accountLoginTab" type="button" class="selected">Login</button>
-        <button id="accountRegisterTab" type="button">Register</button>
-      </div>
-      <form id="accountForm">
-        <label id="accountNameWrap" hidden>Full name
-          <input id="accountName" type="text" maxlength="80" autocomplete="name" placeholder="Your name">
-        </label>
-        <label>Email
-          <input id="accountEmail" type="email" autocomplete="email" required placeholder="you@example.com">
-        </label>
-        <label>Password
-          <input id="accountPassword" type="password" minlength="6" autocomplete="current-password" required placeholder="At least 6 characters">
-        </label>
-        <button id="accountSubmitBtn" class="account-submit" type="submit">Login</button>
-        <p id="accountMessage" role="status" aria-live="polite"></p>
-      </form>
-      <div class="account-admin-link">
-        Admin? <a href="./admin.html">Open Admin Login</a>
-      </div>
-    </section>
-  </div>
-  <style>
-    .account-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
-    .account-btn{border:1px solid #34343b;border-radius:999px;background:#1ed760;color:#101014;padding:9px 14px;font:600 13px/1.2 system-ui,sans-serif;cursor:pointer;white-space:nowrap}
-    .account-logout{background:#25252b;color:#fff}
-    .account-user{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#bbb;font-size:12px}
-    .account-modal[hidden]{display:none!important}
-    .account-modal{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;font-family:system-ui,sans-serif}
-    .account-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(5px)}
-    .account-card{position:relative;width:min(420px,100%);max-height:calc(100dvh - 32px);overflow:auto;padding:28px;background:#19191f;color:#f6f6f7;border:1px solid #35353d;border-radius:18px;box-shadow:0 20px 80px #0009}
-    .account-close{position:absolute;top:12px;right:12px;width:38px;height:38px;border:0;border-radius:50%;background:#2b2b33;color:#fff;font-size:25px;cursor:pointer}
-    .account-logo{display:inline-block;margin-bottom:16px;text-decoration:none;font-size:23px;font-weight:800}
-    .account-logo span{color:#1ed760}
-    .account-card h2{margin:0 0 6px;font-size:25px}
-    .account-subtitle{margin:0 0 20px;color:#a9a9b3;font-size:14px}
-    .account-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;padding:4px;background:#101014;border-radius:10px}
-    .account-tabs button{border:0;border-radius:8px;padding:10px;background:transparent;color:#bdbdc6;font-weight:700;cursor:pointer}
-    .account-tabs button.selected{background:#1ed760;color:#101014}
-    #accountForm{display:grid;gap:13px}
-    #accountForm label{display:grid;gap:7px;color:#e8e8ed;font-size:13px;font-weight:600}
-    #accountForm input{width:100%;box-sizing:border-box;min-height:45px;padding:11px 12px;border:1px solid #41414b;border-radius:9px;background:#101014;color:#fff;font:16px system-ui,sans-serif}
-    #accountForm input:focus{outline:2px solid #1ed760;outline-offset:1px}
-    .account-submit{min-height:46px;margin-top:3px;border:0;border-radius:9px;background:#1ed760;color:#101014;font-weight:800;font-size:15px;cursor:pointer}
-    #accountMessage{min-height:18px;margin:0;color:#ffb8c0;font-size:13px;overflow-wrap:anywhere}
-    .account-admin-link{margin-top:18px;padding-top:15px;border-top:1px solid #34343b;color:#aaa;font-size:13px;text-align:center}
-    .account-admin-link a{color:#1ed760;font-weight:700;text-decoration:none}
-    @media(max-width:760px){
-      .topbar{flex-wrap:wrap}
-      .account-actions{order:4;width:100%;justify-content:flex-end}
-      .account-user{margin-right:auto}
-      .account-card{padding:24px 18px}
+  <h2>Movies</h2>
+  <p id="status" role="status" aria-live="polite"></p>
+  <button id="retry" type="button">Reconnect</button>
+  <div id="movies" class="grid"></div>
+</main>
+
+<footer>CineHub</footer>
+
+<script type="module">
+import {initializeApp}
+from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+/* Firebase configuration */
+const firebaseConfig = {
+  apiKey: "AIzaSyB96qkeFLXWMIMvld9jS9SOmbx2g2sJ98",
+  authDomain: "cinehub-27129.firebaseapp.com",
+  projectId: "cinehub-27129",
+  storageBucket: "cinehub-27129.firebasestorage.app",
+  messagingSenderId: "564236433071",
+  appId: "1:564236433071:web:474301819e114c22bac65a"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const grid = document.getElementById("movies");
+const status = document.getElementById("status");
+const search = document.getElementById("search");
+const retry = document.getElementById("retry");
+
+const CACHE_KEY = "cinehub_movies_cache_v1";
+
+let allMovies = [];
+let loaded = false;
+let unsubscribeMovies = null;
+
+function readCache(){
+  try{
+    const raw = localStorage.getItem(CACHE_KEY);
+    if(!raw) return null;
+
+    const data = JSON.parse(raw);
+    return Array.isArray(data) ? data : null;
+  }catch(error){
+    return null;
+  }
+}
+
+function saveCache(movies){
+  try{
+    localStorage.setItem(CACHE_KEY,JSON.stringify(movies));
+  }catch(error){
+    console.warn("Cache unavailable:",error);
+  }
+}
+
+function renderMovies(){
+  const query = search.value.trim().toLowerCase();
+
+  const filtered = allMovies.filter(movie =>
+    (movie.title || "").toLowerCase().includes(query)
+  );
+
+  grid.replaceChildren();
+
+  if(!filtered.length){
+    status.textContent = query
+      ? "No matching movies found."
+      : "No movies added yet. Add movies through Admin.";
+    return;
+  }
+
+  status.textContent = "";
+  retry.style.display = "none";
+
+  filtered.forEach(movie => {
+    const card = document.createElement("article");
+    card.className = "card";
+    card.tabIndex = 0;
+    card.setAttribute("role","link");
+    card.setAttribute("aria-label","View "+(movie.title||"movie")+" details");
+
+    if(movie.poster){
+      const img = document.createElement("img");
+      img.className = "poster";
+      img.src = movie.poster;
+      img.alt = (movie.title || "Movie") + " poster";
+      img.loading = "lazy";
+
+      img.onerror = () => {
+        img.style.visibility = "hidden";
+      };
+
+      card.appendChild(img);
+    }else{
+      const placeholder = document.createElement("div");
+      placeholder.className = "poster";
+      card.appendChild(placeholder);
     }
-  </style>
 
-  <script type="module" src="auth.js"></script>
-  <script src="app.js"></script>
+    const title = document.createElement("h3");
+    title.textContent = movie.title || "Untitled";
+
+    const year = document.createElement("div");
+    year.className = "year";
+    year.textContent = movie.year || "";
+
+    card.append(title,year);
+
+    function openDetails(){
+      /* Cache selected movie before navigation for instant details */
+      try{
+        localStorage.setItem(
+          "cinehub_detail_v1_" + movie.documentId,
+          JSON.stringify(movie)
+        );
+      }catch(error){
+        console.warn("Could not cache selected movie:", error);
+      }
+      const detailsUrl = new URL("movie.html", window.location.href);
+      detailsUrl.searchParams.set("id", movie.documentId);
+      window.location.href = detailsUrl.href;
+    }
+
+    card.addEventListener("click",openDetails);
+    card.addEventListener("keydown",event=>{
+      if(event.key==="Enter" || event.key===" "){
+        event.preventDefault();
+        openDetails();
+      }
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+/* Show cached movies immediately */
+const cachedMovies = readCache();
+
+if(cachedMovies !== null){
+  allMovies = cachedMovies;
+  loaded = true;
+  renderMovies();
+}
+
+/* Live updates when Admin adds or deletes movies */
+function loadMovies(){
+  retry.style.display = "none";
+
+  if(unsubscribeMovies){
+    unsubscribeMovies();
+    unsubscribeMovies = null;
+  }
+
+  unsubscribeMovies = onSnapshot(
+    collection(db,"movies"),
+
+    snapshot => {
+      allMovies = snapshot.docs.map(document => ({
+        ...document.data(),
+        documentId: document.id
+      }));
+
+      allMovies.sort((a,b) =>
+        (b.updatedAt || "").localeCompare(a.updatedAt || "")
+      );
+
+      loaded = true;
+      saveCache(allMovies);
+      renderMovies();
+    },
+
+    error => {
+      console.error("Firestore listener error:",error);
+
+      if(!loaded){
+        grid.replaceChildren();
+        status.textContent =
+          "Could not load movies. Check Firestore rules and connection.";
+      }else{
+        status.textContent =
+          "Connection interrupted. Showing available movies.";
+      }
+
+      retry.style.display = "inline-block";
+    }
+  );
+}
+
+search.addEventListener("input",()=>{
+  if(loaded) renderMovies();
+});
+
+retry.addEventListener("click",loadMovies);
+
+loadMovies();
+</script>
+
+<div id="accountModal" class="account-modal" hidden>
+  <div class="account-backdrop" data-account-close="true"></div>
+  <section class="account-card" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+    <button id="accountCloseBtn" class="account-close" type="button" aria-label="Close">×</button>
+    <a class="account-logo" href="./">CineHub</a>
+    <h2 id="accountTitle">Welcome to CineHub</h2>
+    <p class="account-subtitle">Sign in or create your free account.</p>
+    <div class="account-tabs">
+      <button id="accountLoginTab" type="button" class="selected">Login</button>
+      <button id="accountRegisterTab" type="button">Register</button>
+    </div>
+    <form id="accountForm">
+      <label id="accountNameWrap" hidden>Full name
+        <input id="accountName" type="text" maxlength="80" autocomplete="name" placeholder="Your name">
+      </label>
+      <label>Email
+        <input id="accountEmail" type="email" autocomplete="email" required placeholder="you@example.com">
+      </label>
+      <label>Password
+        <input id="accountPassword" type="password" minlength="6" autocomplete="current-password" required placeholder="At least 6 characters">
+      </label>
+      <button id="accountSubmitBtn" class="account-submit" type="submit">Login</button>
+      <p id="accountMessage" role="status" aria-live="polite"></p>
+    </form>
+    <div class="account-admin-link">Admin? <a href="./admin.html">Open Admin Login</a></div>
+  </section>
+</div>
+<script type="module" src="auth.js"></script>
+
 </body>
 </html>
